@@ -1,0 +1,27 @@
+var config = {
+  local: {
+           "title":                "GitHub Issues to Discourse Mover",
+           "github_client_id":     "GITHUB CLIENT ID",
+           "github_client_secret": "GITHUB CLIENT SECRET",
+           "session_secret":       "SESSION SECRET SIGN PHRASE",
+           "debug":                false
+         },
+  staging: {
+           "title":                "GitHub Issues to Discourse Mover",
+           "github_client_id":     "GITHUB CLIENT ID",
+           "github_client_secret": "GITHUB CLIENT SECRET",
+           "session_secret":       "SESSION SECRET SIGN PHRASE",
+           "debug":                false
+         },
+  production: {
+           "title":                "GitHub Issues to Discourse Mover",
+           "github_client_id":     "GITHUB CLIENT ID",
+           "github_client_secret": "GITHUB CLIENT SECRET",
+           "session_secret":       "SESSION SECRET SIGN PHRASE",
+           "debug":                false
+         }
+}
+
+module.exports = function(mode) {
+	return config[mode || process.argv[2] || 'local'] || config.local;
+}

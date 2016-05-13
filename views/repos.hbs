@@ -1,0 +1,13 @@
+<h2>Repos with Open Issues:</h2>
+{{#each repos}}
+  <div class="repo-badge">
+    <div class="count">{{open_issues_count}}<div class="description">issue(s)</div></div>
+    <div class="name">{{name}}</div>
+    <div class="description">
+      {{description}}
+    </div>
+    <div class="select">
+      <a href="/repos/{{full_name}}" class="btn btn-primary">Select</a>
+    </div>
+  </div>
+{{/each}}

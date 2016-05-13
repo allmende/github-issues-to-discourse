@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Coming+Soon" type="text/css" />
+    <link rel='stylesheet' href='//maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css' />
+    <link rel='stylesheet' href='//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css' />
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+  </head>
+  <body>
+    <div class="header">
+      <a href="/" class="logo">
+        <img src="/images/github-mark.png" height="64px" /> <img src="/images/github-logo.png" height="64px" />
+        <i class="fa fa-arrow-right" aria-hidden="true"></i>
+        <img src="/images/discourse-logo.png" height="64px" />
+      </a>
+
+      <div class="profile">
+        {{#if user}}
+          <a href="{{user.profileUrl}}" target="_blank"><img src="{{user._json.avatar_url}}" height="45px" /></a>
+          <a href="{{user.profileUrl}}" target="_blank">{{user.username}}</a>
+          <a href="/logout" role="button" class="btn btn-danger">logout</a>
+        {{/if}}
+      </div>
+    </div>
+    <div class="explanation">
+      Making it easy to migrate issues between GitHub repos and Discourse:
+
+      <ul>
+        <li>Copy the issue to the Discourse destination</li>
+        <li>Add references between the two systems</li>
+        <li>Close the original issue</li>
+      </ul>
+    </div>
+    <div class="content">
+      {{{body}}}
+    </div>
+    {{#if debug}}
+      <div class="debug">
+        <h2>Debug Information:</h2>
+        {{#each debugData}}
+          <p>{{name}}:</p>
+          <textarea rows="10" cols="100">{{data}}</textarea>
+          <br /><br />
+        {{/each}}
+      </div>
+    {{/if}}
+    <script type="text/javascript" src="//code.jquery.com/jquery-2.2.3.min.js" integrity="sha256-a23g1Nt4dtEYOj7bR+vTu7+T8VP13humZFBJNIYoEJo=" crossorigin="anonymous"></script>
+    <script type="text/javascript" src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
