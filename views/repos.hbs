@@ -1,8 +1,10 @@
 <h2>Repos with Open Issues:</h2>
 {{#each repos}}
   <div class="repo-badge">
-    <div class="count">{{open_issues_count}}<div class="description">issue(s)</div></div>
-    <div class="name">{{name}}</div>
+    <div class="count">{{open_issues_count}}<div class="describe">issue(s)</div></div>
+    <div class="name">
+      <div>{{full_name}}</div>
+    </div>
     <div class="description">
       {{description}}
     </div>

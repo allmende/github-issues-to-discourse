@@ -5,14 +5,15 @@
  */
 
 var app = require('../app');
-var debug = require('debug')('github-issues-to-discourse-hbs:server');
+var config = require('../config')(process.env.CONFIG);
+var debug = require('debug')('github-issues-to-discourse:server');
 var http = require('http');
 
 /**
  * Get port from environment and store in Express.
  */
 
-var port = normalizePort(process.env.PORT || '3000');
+var port = normalizePort(config.env.port || '3000');
 app.set('port', port);
 
 /**

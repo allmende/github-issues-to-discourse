@@ -1,16 +1,15 @@
 body {
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
   padding: 0;
   margin: 0;
 }
 
 .header {
   border-bottom: 2px solid #000;
-  padding: 1em 3em;
+  padding: 1rem 3rem;
 }
 
 .header i {
-  font-size: 58px;
+  font-size: 6rem;
   vertical-align: top;
   color: #666;
 }
@@ -21,8 +20,8 @@ body {
 
 .header .profile {
   float: right;
-  font-size: 18px;
-  padding-top: .75em;
+  font-size: 2rem;
+  padding-top: 1rem;
 }
 
 .header .profile img {
@@ -30,61 +29,114 @@ body {
 }
 
 .header .profile img, .header .profile a {
-  margin-left: 1em;
+  margin-left: 1.5rem;
 }
 
 .explanation {
-  background-color: #DEDEDE;
+  background-color: #EDEDED;
   border-bottom: 2px solid #000;
   clear: both;
   font-family: 'Coming Soon', cursive;
-  font-size: 20px;
-  line-height: 30px;
-  padding: 1em 3em;
+  font-size: 2rem;
+  line-height: 3rem;
+  padding: 2rem 6rem;
 }
 
 .content, .debug {
   clear: both;
-  padding: 3em;
+  padding: 3rem;
 }
 
 .content p, .debug p {
-  font-size: 20px;
+  font-size: 2rem;
 }
 
 .content p {
-  padding-bottom: 20px;
+  padding-bottom: 2rem;
 }
 
 .repo-badge {
+  background-color: #FFF;
   border: 1px solid #666;
   border-radius: 15px;
+  display: block;
   float: left;
-  margin-right: 20px;
-  padding: .5em;
-  width: 240px;
+  margin-bottom: 2rem;
+  margin-right: 2rem;
+  padding: .5rem;
+  width: 27rem;
+}
+
+.repo-badge:hover {
+  background-color: #FFFFCC;
+  text-decoration: none;
 }
 
 .repo-badge .count {
-  font-size: 40px;
-  padding: 1em 0;
+  color: #000;
+  font-size: 6rem;
+  padding: 3rem 0;
   text-align: center;
 }
 
-.repo-badge .name {
-  font-size: 18px;
-  font-weight: bold;
-}
-
-.repo-badge .description {
+.repo-badge .describe {
+  color: #000;
   font-size: initial;
 }
 
+.repo-badge .name {
+  font-size: 1.75rem;
+  font-weight: bold;
+  height: 4rem;
+  line-height: 2rem;
+  overflow: hidden;
+  position: relative;
+  text-overflow: ellipsis;
+  vertical-align: bottom;
+}
+
+.repo-badge .name div {
+  color: #000;
+  position: absolute;
+  bottom: 0;
+}
+
+.repo-badge .description {
+  color: #000;
+  font-size: 1.5rem;
+  height: 3.5rem;
+  line-height: 1.75rem;
+  overflow: hidden;
+  position: relative;
+  text-overflow: ellipsis;
+}
+
 .repo-badge .select {
-  padding: .25em 0;
+  padding: .25rem 0;
   text-align: center;
 }
 
 .repo-badge .select .btn {
   width: 100%;
+}
+
+.container {
+  margin: 2em 0;
+}
+
+.show-grid [class^=col-] {
+  border: 1px solid #ccc;
+  height: 6em;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  position: relative;
+}
+
+.row:nth-child(even) {
+  background-color: #EDEDED;
+}
+
+.alert p {
+  font-size: 1.5rem;
+  margin-bottom: 0;
 }

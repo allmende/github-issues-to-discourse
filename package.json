@@ -1,5 +1,5 @@
 {
-  "name": "github-issues-to-discourse-hbs",
+  "name": "github-issues-to-discourse",
   "version": "0.0.0",
   "private": true,
   "scripts": {

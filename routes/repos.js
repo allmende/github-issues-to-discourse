@@ -1,20 +1,11 @@
-var config = require('../config');
 var express = require('express');
-var GitHubApi = require("github");
+var github = require("../lib/github")();
 var router = express.Router();
-
-var github = new GitHubApi({
-  version: "3.0.0",
-  protocol: "https",
-  host: "api.github.com",
-  pathPrefix: "",
-  timeout: 5000
-});
 
 /* GET repos listing. */
 router.get('/repos', function(req, res, next) {
   var oThis = res;
-  var model = {title: config.title + " - Repos", debug: config.debug}
+  var model = {title: req.config.title + " - Repos", debug: req.config.debug}
 
   github.authenticate({
     type: "oauth",
@@ -22,27 +13,25 @@ router.get('/repos', function(req, res, next) {
   });
 
   github.repos.getAll({}, function(err, res) {
-    if (!err) {
-      model.repos = res.filter(function(item) { return item.open_issues_count > 0; })
-        .sort(function(a, b) {
-          if (a.open_issues_count > b.open_issues_count) return -1;
-          if (a.open_issues_count < b.open_issues_count) return 1;
-          return 0;
-        });
+    if (err) {
+      // TODO: Figure out how to manage this
+      next(err);
+    }
 
-      model.user = req.session.user.profile;
+    model.repos = res.filter(item =>  item.open_issues_count > 0)
+      .sort(function(a, b) { return b.open_issues_count - a.open_issues_count; });
 
-      var user = req.session.user.profile;
-      req.session.repos = model.repos;
+    model.user = req.session.user.profile;
 
-      if (model.debug) {
-        model.debugData = [{ name: 'user', data: JSON.stringify(model.user) },
-          { name: 'repos', data: JSON.stringify(model.repos)}];
-      }
+    var user = req.session.user.profile;
+    req.session.repos = model.repos;
 
-      oThis.render('repos', model);
-    } else
-      oThis.redirect('/');
+    if (model.debug) {
+      model.debugData = [{ name: 'user', data: JSON.stringify(model.user) },
+        { name: 'repos', data: JSON.stringify(model.repos)}];
+    }
+
+    oThis.render('repos', model);
   });
 });
 

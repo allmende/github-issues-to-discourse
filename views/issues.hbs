@@ -1,1 +1,57 @@
-<h2>Open Issues for {{selectedRepo}}:</h2>
+<h2>Open Issues for {{fullRepoName}}:</h2>
+<div class="alert alert-danger fade hidden" role="alert">
+  <button type="button" class="close" aria-label="Close"><span aria-hidden="true">×</span></button>
+  <h4>Oh snap! You forgot to select at least 1 issue!</h4>
+  <p>
+    We sort of need you to select an issue so we can continue, we hope you understand.
+  </p>
+</div>
+<form method="post" action="/repos/{{fullRepoName}}/issues" onsubmit="return validateSelection();">
+  <ul class="nav nav-pills">
+    <li role="presentation" class="dropdown">
+      <a class="dropdown-toggle btn btn-default" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
+        Filter Issues <span class="caret"></span>
+      </a>
+      <ul class="dropdown-menu">
+        {{#each issueLabels}}
+          <li><a href="?filter={{name}}">{{name}}</a></li>
+        {{/each}}
+      </ul>
+    </li>
+    <li role="presentation" {{#if hideClearFilter}}class="disabled"{{/if}}>
+      <a href="/repos/{{fullRepoName}}"><i class="fa fa-close"></i> Clear Filter</a>
+    </li>
+    <li role="presentation" class="pull-right">
+      <button type="submit" class="btn btn-primary">Select Issues</button>
+    </li>
+  </ul>
+
+  <table class="table table-hover">
+    <thead>
+      <tr>
+        <th><input type="checkbox" name="selectAll" onchange="selectCheckboxes(this.checked);" /></th>
+        <th>#</th>
+        <th>Title</th>
+        <th>Labels</th>
+        <th>Comments</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each issues}}
+        <tr>
+          <td><input type="checkbox" name="issues[]" value="{{number}}" /></td>
+          <td>#{{number}}</td>
+          <td><a href="{{html_url}}" target="_blank">{{title}}</a></td>
+          <td>{{labelTags}}</td>
+          <td>{{comments}}</td>
+        </tr>
+      {{/each}}
+    </tbody>
+  </table>
+
+  <ul class="nav nav-pills">
+    <li role="presentation" class="pull-right">
+      <button type="submit" class="btn btn-primary">Select Issues</button>
+    </li>
+  </ul>
+</form>

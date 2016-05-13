@@ -1,24 +1,60 @@
 var config = {
   local: {
-           "title":                "GitHub Issues to Discourse Mover",
-           "github_client_id":     "GITHUB CLIENT ID",
-           "github_client_secret": "GITHUB CLIENT SECRET",
-           "session_secret":       "SESSION SECRET SIGN PHRASE",
-           "debug":                false
+           title:                "GitHub Issues to Discourse Mover",
+           github_client_id:     "GITHUB CLIENT ID",
+           github_client_secret: "GITHUB CLIENT SECRET",
+           session_secret:       "SESSION SECRET SIGN PHRASE",
+           debug:                false,
+
+           github_api: {
+             version:            "3.0.0",
+             protocol:           "https",
+             host:               "api.github.com",
+             pathPrefix:         "",
+             timeout:            5000
+           },
+
+           env : {
+             port:               3000
+           }
          },
   staging: {
-           "title":                "GitHub Issues to Discourse Mover",
-           "github_client_id":     "GITHUB CLIENT ID",
-           "github_client_secret": "GITHUB CLIENT SECRET",
-           "session_secret":       "SESSION SECRET SIGN PHRASE",
-           "debug":                false
+           title:                "GitHub Issues to Discourse Mover",
+           github_client_id:     "GITHUB CLIENT ID",
+           github_client_secret: "GITHUB CLIENT SECRET",
+           session_secret:       "SESSION SECRET SIGN PHRASE",
+           debug:                false,
+
+           github_api: {
+             version:            "3.0.0",
+             protocol:           "https",
+             host:               "api.github.com",
+             pathPrefix:         "",
+             timeout:            5000
+           },
+
+           env : {
+             port:               80
+           }
          },
   production: {
-           "title":                "GitHub Issues to Discourse Mover",
-           "github_client_id":     "GITHUB CLIENT ID",
-           "github_client_secret": "GITHUB CLIENT SECRET",
-           "session_secret":       "SESSION SECRET SIGN PHRASE",
-           "debug":                false
+           title:                "GitHub Issues to Discourse Mover",
+           github_client_id:     "GITHUB CLIENT ID",
+           github_client_secret: "GITHUB CLIENT SECRET",
+           session_secret:       "SESSION SECRET SIGN PHRASE",
+           debug:                false,
+
+           github_api: {
+             version:            "3.0.0",
+             protocol:           "https",
+             host:               "api.github.com",
+             pathPrefix:         "",
+             timeout:            5000
+           },
+
+           env : {
+             port:               80
+           }
          }
 }
 

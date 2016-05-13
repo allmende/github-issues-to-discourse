@@ -1,4 +1,4 @@
-var config = require('./config');
+var config = require('./config')(process.env.CONFIG);
 var express = require('express');
 var path = require('path');
 var favicon = require('serve-favicon');
@@ -10,7 +10,7 @@ var GitHubStrategy = require('passport-github').Strategy;
 var session = require('express-session');
 
 var app = express();
-console.log(config);
+
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'hbs');
@@ -23,6 +23,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(session({secret: config.session_secret, resave: true, saveUninitialized: true}));
+app.use(function(req, res, next) { req.config = config; next(); });
 
 // initialize passport and restore authentication state if available
 app.use(passport.initialize());
