@@ -3,7 +3,10 @@ var router = express.Router();
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-  var model = { title: req.config.title, debug: req.config.debug };
+  var model = {
+    title: req.config.title,
+    debug: req.config.debug
+  };
 
   if (req.session.user)
     model.user = req.session.user.profile;

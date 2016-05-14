@@ -5,7 +5,10 @@ var router = express.Router();
 /* GET repos listing. */
 router.get('/repos', function(req, res, next) {
   var oThis = res;
-  var model = {title: req.config.title + " - Repos", debug: req.config.debug}
+  var model = {
+    title: req.config.title + " - Repositories",
+    debug: req.config.debug
+  };
 
   github.authenticate({
     type: "oauth",
@@ -18,7 +21,7 @@ router.get('/repos', function(req, res, next) {
       next(err);
     }
 
-    model.repos = res.filter(item =>  item.open_issues_count > 0)
+    model.repos = res.filter(item => item.open_issues_count > 0)
       .sort(function(a, b) { return b.open_issues_count - a.open_issues_count; });
 
     model.user = req.session.user.profile;

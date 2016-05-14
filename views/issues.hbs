@@ -17,6 +17,7 @@
         Filter Issues <span class="caret"></span>
       </a>
       <ul class="dropdown-menu">
+        <li><a href="?no_label=true">-- empty --</a></li>
         {{#each issueLabels}}
           <li><a href="?filter={{name}}">{{name}}</a></li>
         {{/each}}
@@ -26,7 +27,7 @@
       <a href="/repos/{{fullRepoName}}"><i class="fa fa-close"></i> Clear Filter</a>
     </li>
     <li role="presentation" class="pull-right">
-      <button type="submit" class="btn btn-primary">Select Issues</button>
+      <button type="submit" class="btn btn-primary">Continue</button>
     </li>
   </ul>
 
@@ -53,9 +54,11 @@
     </tbody>
   </table>
 
-  <ul class="nav nav-pills">
-    <li role="presentation" class="pull-right">
-      <button type="submit" class="btn btn-primary">Select Issues</button>
-    </li>
-  </ul>
+  {{#if showBottomButton}}
+    <ul class="nav nav-pills">
+      <li role="presentation" class="pull-right">
+        <button type="submit" class="btn btn-primary">Continue</button>
+      </li>
+    </ul>
+  {{/if}}
 </form>

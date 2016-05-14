@@ -16,17 +16,25 @@ router.param('name', function(req, res, next, name) {
   if (!repo || repo.length === 0)
     return next(new Error("Repo not Found"));
 
-  req.selectedName = name;
+  req.selectedRepo = name;
   return next();
 });
 
 /* GET issues listing. */
 router.get('/repos/:owner/:name', function(req, res, next) {
   var oThis = res;
-  var fullRepoName = req.selectedOwner + "/" + req.selectedName;
-  var model = {title: req.config.title + " - Issues for Repo " + fullRepoName, repoOwner: req.selectedOwner,
-    repoName: req.selectedName, fullRepoName: fullRepoName, user: req.session.user.profile,
-    repos: req.session.repos, hideClearFilter: true, debug: req.config.debug};
+  var fullRepoName = req.selectedOwner + "/" + req.selectedRepo;
+  var model = {
+    title: req.config.title + " - Open Issues for Repository " + fullRepoName,
+    repoOwner: req.selectedOwner,
+    repoName: req.selectedRepo,
+    fullRepoName: fullRepoName,
+    user: req.session.user.profile,
+    repos: req.session.repos,
+    hideClearFilter: true,
+    debug: req.config.debug
+  };
+
   req.session.repoOwner = model.repoOwner;
   req.session.repoName = model.repoName;
 
@@ -55,14 +63,20 @@ router.get('/repos/:owner/:name', function(req, res, next) {
       model.issues = res.map(item => {
           item.labelTags = item.labels.map(label => label.name).join(', ');
           return item;
-        })
+        });
       req.session.issues = model.issues;
 
       if (req.query.filter) {
-        console.log("filtering");
         model.issues = model.issues.filter(item => item.labelTags.indexOf(req.query.filter) !== -1);
         model.hideClearFilter = false;
       }
+
+      if (req.query.no_label) {
+        model.issues = model.issues.filter(item => item.labelTags.length === 0);
+        model.hideClearFilter = false;
+      }
+
+      model.showBottomButton = model.issues.length > 10;
 
       if (model.debug) {
         model.debugData = [{ name: 'user', data: JSON.stringify(model.user) },
