@@ -12,7 +12,9 @@ router.get('/', function(req, res, next) {
     model.user = req.session.user.profile;
 
   if (model.debug && model.user) {
-    model.debugData = [{ name: 'user', data: JSON.stringify(model.user) }];
+    model.debugData = [
+      { name: 'user', data: JSON.stringify(model.user) }
+    ];
   }
 
   res.render('index', model);

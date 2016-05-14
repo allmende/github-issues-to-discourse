@@ -7,6 +7,7 @@ router.get('/repos', function(req, res, next) {
   var oThis = res;
   var model = {
     title: req.config.title + " - Repositories",
+    user: req.session.user.profile,
     debug: req.config.debug
   };
 
@@ -23,15 +24,13 @@ router.get('/repos', function(req, res, next) {
 
     model.repos = res.filter(item => item.open_issues_count > 0)
       .sort(function(a, b) { return b.open_issues_count - a.open_issues_count; });
-
-    model.user = req.session.user.profile;
-
-    var user = req.session.user.profile;
-    req.session.repos = model.repos;
+    req.session.user.repos = model.repos;
 
     if (model.debug) {
-      model.debugData = [{ name: 'user', data: JSON.stringify(model.user) },
-        { name: 'repos', data: JSON.stringify(model.repos)}];
+      model.debugData = [
+        { name: 'user', data: JSON.stringify(model.user) },
+        { name: 'repos', data: JSON.stringify(model.repos)}
+      ];
     }
 
     oThis.render('repos', model);

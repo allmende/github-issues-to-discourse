@@ -3,7 +3,7 @@ var github = require("../lib/github")();
 var router = express.Router();
 
 router.param('owner', function(req, res, next, owner) {
-  var repo = req.session.repos.filter(function(item) { return item.full_name.split('/')[0] === owner; });
+  var repo = req.session.user.repos.filter(function(item) { return item.full_name.split('/')[0] === owner; });
   if (!repo || repo.length === 0)
     return next(new Error("Owner not Found"));
 
@@ -12,7 +12,7 @@ router.param('owner', function(req, res, next, owner) {
 });
 
 router.param('name', function(req, res, next, name) {
-  var repo = req.session.repos.filter(function(item) { return item.full_name.split('/')[1] === name; });
+  var repo = req.session.user.repos.filter(function(item) { return item.full_name.split('/')[1] === name; });
   if (!repo || repo.length === 0)
     return next(new Error("Repo not Found"));
 
@@ -26,24 +26,21 @@ router.get('/repos/:owner/:name', function(req, res, next) {
   var fullRepoName = req.selectedOwner + "/" + req.selectedRepo;
   var model = {
     title: req.config.title + " - Open Issues for Repository " + fullRepoName,
-    repoOwner: req.selectedOwner,
-    repoName: req.selectedRepo,
-    fullRepoName: fullRepoName,
     user: req.session.user.profile,
-    repos: req.session.repos,
+    fullRepoName: fullRepoName,
     hideClearFilter: true,
     debug: req.config.debug
   };
 
-  req.session.repoOwner = model.repoOwner;
-  req.session.repoName = model.repoName;
+  if (!req.session.repo || req.session.repo.owner !== req.selectedOwner || req.session.repo.name !== req.selectedRepo)
+    req.session.repo = { owner: req.selectedOwner, name: req.selectedRepo };
 
   github.authenticate({
     type: "oauth",
     token: req.user.accessToken
   });
 
-  github.issues.getLabels({ user: model.repoOwner, repo: model.repoName }, function(err, res) {
+  github.issues.getLabels({ user: req.session.repo.owner, repo: req.session.repo.name }, function(err, res) {
     if (err) {
       // TODO: Figure out how to manage this
       console.log(err);
@@ -51,9 +48,9 @@ router.get('/repos/:owner/:name', function(req, res, next) {
     }
 
     model.issueLabels = res;
-    req.session.issueLabels = model.issueLabels;
+    req.session.repo.issueLabels = model.issueLabels;
 
-    github.issues.repoIssues({ user: model.repoOwner, repo: model.repoName, state: 'open' }, function(err, res) {
+    github.issues.repoIssues({ user: req.session.repo.owner, repo: req.session.repo.name, state: 'open' }, function(err, res) {
       if (err) {
         // TODO: Figure out how to manage this
         console.log(err);
@@ -64,7 +61,15 @@ router.get('/repos/:owner/:name', function(req, res, next) {
           item.labelTags = item.labels.map(label => label.name).join(', ');
           return item;
         });
-      req.session.issues = model.issues;
+
+      if (req.session.repo.selectedIssues)
+        req.session.repo.selectedIssues.forEach(issue => {
+            var selectedIssue = model.issues.find(item => item.number == issue)
+            if (selectedIssue)
+              selectedIssue.selected = true;
+          });
+
+      req.session.repo.issues = model.issues;
 
       if (req.query.filter) {
         model.issues = model.issues.filter(item => item.labelTags.indexOf(req.query.filter) !== -1);

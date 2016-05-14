@@ -19,7 +19,7 @@ app.set('view engine', 'hbs');
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(logger('dev'));
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(session({secret: config.session_secret, resave: true, saveUninitialized: true}));
@@ -59,6 +59,9 @@ app.get('/', require('./routes/index'));
 app.get('/repos', ensureAuthenticated, require('./routes/repos'));
 app.get('/repos/:owner/:name', ensureAuthenticated, require('./routes/issues'));
 app.get('/logout', require('./routes/logout'));
+
+// Define the POST requests
+app.post('/api/issues/save', ensureAuthenticated, require('./routes/api/issues'));
 
 function ensureAuthenticated(req,res,next){
   if(req.isAuthenticated())
