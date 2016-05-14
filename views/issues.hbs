@@ -1,4 +1,5 @@
-<h2>Open Issues for {{fullRepoName}}:</h2>
+<h2>Open Issues for <a href="{{selectedRepo.html_url}}" target="_blank">{{selectedRepo.full_name}}</a>:
+<a href="/repos" class="btn btn-default">Change Repository Selection</a></h2>
 <p>
   Select the issues you want to import into Discourse.
 </p>
@@ -10,57 +11,67 @@
     We sort of need you to select an issue so we can continue, we hope you understand.
   </p>
 </div>
-<form method="post" action="/repos/{{fullRepoName}}/issues" onsubmit="return validateSelection();">
+<ul class="nav nav-pills">
+  <li role="presentation" class="dropdown">
+    <a class="dropdown-toggle btn btn-default" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
+      Filter Issues <span class="caret"></span>
+    </a>
+    <ul class="dropdown-menu">
+      <li><a href="?no_label=true">-- empty --</a></li>
+      {{#each issueLabels}}
+        <li><a href="?filter={{name}}">{{name}}</a></li>
+      {{/each}}
+    </ul>
+  </li>
+  <li role="presentation" {{#if hideClearFilter}}class="disabled"{{/if}}>
+    <a href="/repos/{{selectedRepo.full_name}}"><i class="fa fa-close"></i> Clear Filter</a>
+  </li>
+  <li role="presentation">
+    <span class="selected-status">
+      <span class="numSelectedIssues">{{numSelectedIssues}}</span> of {{numTotalIssues}} selected
+    </span>
+  </li>
+  {{#if showSelectedButton}}
+    <li role="presentation">
+      <a href="?only_selected=true" class="btn btn-default">Show Selected</a>
+    </li>
+  {{else}}
+    <li role="presentation">
+      <a href="/repos/{{selectedRepo.full_name}}" class="btn btn-default">Show All</a>
+    </li>
+  {{/if}}
+  <li role="presentation" class="pull-right">
+    <button type="submit" class="btn btn-primary">Continue</button>
+  </li>
+</ul>
+
+<table class="table table-hover">
+  <thead>
+    <tr>
+      <th><input type="checkbox" class="select-all" value="all" /></th>
+      <th>#</th>
+      <th>Title</th>
+      <th>Labels</th>
+      <th>Comments</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{#each issues}}
+      <tr {{#if selected}}class="selected"{{/if}}>
+        <td><input type="checkbox" name="issues[]" value="{{number}}" {{#if selected}}checked="checked"{{/if}} /></td>
+        <td>#{{number}}</td>
+        <td><a href="{{html_url}}" target="_blank">{{title}}</a></td>
+        <td>{{labelTags}}</td>
+        <td>{{comments}}</td>
+      </tr>
+    {{/each}}
+  </tbody>
+</table>
+
+{{#if showBottomButton}}
   <ul class="nav nav-pills">
-    <li role="presentation" class="dropdown">
-      <a class="dropdown-toggle btn btn-default" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
-        Filter Issues <span class="caret"></span>
-      </a>
-      <ul class="dropdown-menu">
-        <li><a href="?no_label=true">-- empty --</a></li>
-        {{#each issueLabels}}
-          <li><a href="?filter={{name}}">{{name}}</a></li>
-        {{/each}}
-      </ul>
-    </li>
-    <li role="presentation" {{#if hideClearFilter}}class="disabled"{{/if}}>
-      <a href="/repos/{{fullRepoName}}"><i class="fa fa-close"></i> Clear Filter</a>
-    </li>
     <li role="presentation" class="pull-right">
-      <button type="button" class="btn btn-primary saveIssues" data-loading-text="Saving...">Save</button>
       <button type="submit" class="btn btn-primary">Continue</button>
     </li>
   </ul>
-
-  <table class="table table-hover">
-    <thead>
-      <tr>
-        <th><input type="checkbox" name="selectAll" onchange="selectCheckboxes(this.checked);" /></th>
-        <th>#</th>
-        <th>Title</th>
-        <th>Labels</th>
-        <th>Comments</th>
-      </tr>
-    </thead>
-    <tbody>
-      {{#each issues}}
-        <tr>
-          <td><input type="checkbox" name="issues[]" value="{{number}}" {{#if selected}}checked="checked"{{/if}} /></td>
-          <td>#{{number}}</td>
-          <td><a href="{{html_url}}" target="_blank">{{title}}</a></td>
-          <td>{{labelTags}}</td>
-          <td>{{comments}}</td>
-        </tr>
-      {{/each}}
-    </tbody>
-  </table>
-
-  {{#if showBottomButton}}
-    <ul class="nav nav-pills">
-      <li role="presentation" class="pull-right">
-        <button type="button" class="btn btn-primary saveIssues" data-loading-text="Saving...">Save</button>
-        <button type="submit" class="btn btn-primary">Continue</button>
-      </li>
-    </ul>
-  {{/if}}
-</form>
+{{/if}}

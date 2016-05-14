@@ -24,11 +24,15 @@ router.param('name', function(req, res, next, name) {
 router.get('/repos/:owner/:name', function(req, res, next) {
   var oThis = res;
   var fullRepoName = req.selectedOwner + "/" + req.selectedRepo;
+  var selectedRepo = req.session.user.repos.find(item => item.full_name === fullRepoName);
   var model = {
     title: req.config.title + " - Open Issues for Repository " + fullRepoName,
     user: req.session.user.profile,
-    fullRepoName: fullRepoName,
+    selectedRepo: selectedRepo,
+    numTotalIssues: selectedRepo.open_issues_count,
+    numSelectedIssues: 0,
     hideClearFilter: true,
+    showSelectedButton: true,
     debug: req.config.debug
   };
 
@@ -62,12 +66,14 @@ router.get('/repos/:owner/:name', function(req, res, next) {
           return item;
         });
 
-      if (req.session.repo.selectedIssues)
+      if (req.session.repo.selectedIssues) {
+        model.numSelectedIssues = req.session.repo.selectedIssues.length;
         req.session.repo.selectedIssues.forEach(issue => {
             var selectedIssue = model.issues.find(item => item.number == issue)
             if (selectedIssue)
               selectedIssue.selected = true;
           });
+      }
 
       req.session.repo.issues = model.issues;
 
@@ -81,15 +87,20 @@ router.get('/repos/:owner/:name', function(req, res, next) {
         model.hideClearFilter = false;
       }
 
+      if (req.query.only_selected) {
+        model.issues = model.issues.filter(item => item.selected);
+        model.hideClearFilter = false;
+        model.showSelectedButton = false;
+      }
+
       model.showBottomButton = model.issues.length > 10;
 
       if (model.debug) {
         model.debugData = [{ name: 'user', data: JSON.stringify(model.user) },
-          { name: 'repos', data: JSON.stringify(model.repos)},
+          { name: 'selectedRepo', data: JSON.stringify(model.selectedRepo)},
           { name: 'issues', data: JSON.stringify(model.issues)},
           { name: 'issueLabels', data: JSON.stringify(model.issueLabels)},
-          { name: 'hideClearFilter', data: model.hideClearFilter},
-          { name: 'fullRepoName', data: model.fullRepoName}];
+          { name: 'hideClearFilter', data: model.hideClearFilter}];
       }
 
       oThis.render('issues', model);

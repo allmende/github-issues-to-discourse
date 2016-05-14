@@ -124,6 +124,12 @@ body {
   margin: 2em 0;
 }
 
+.selected-status {
+  display: inline-block;
+  padding: 10px 15px;
+  position: relative;
+}
+
 .show-grid [class^=col-] {
   border: 1px solid #ccc;
   height: 6em;
@@ -132,8 +138,8 @@ body {
   position: relative;
 }
 
-.row:nth-child(even) {
-  background-color: #EDEDED;
+tr.selected {
+  background-color: #FFFFCC;
 }
 
 .alert p {
