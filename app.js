@@ -64,6 +64,7 @@ app.get('/logout', require('./routes/logout'));
 // Define the POST requests
 app.post('/api/issues/bulk', ensureAuthenticated, require('./routes/api/issues'));
 app.post('/api/issues/save', ensureAuthenticated, require('./routes/api/issues'));
+app.post('/api/discourse/check', ensureAuthenticated, require('./routes/api/discourse'));
 
 function ensureAuthenticated(req,res,next){
   if(req.isAuthenticated())

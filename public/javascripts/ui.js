@@ -7,9 +7,37 @@ function gatherFormDataForIssues() {
 }
 
 $(document).ready(function() {
+  $('#btnCheckSettings').on('click', function() {
+    $(this).button('loading');
+    $('#checkError,#checkSuccess').addClass('hidden');
+    $('#discourseCategory option:not(.keep)').remove();
+
+    var submission = $.post('/api/discourse/check', $('form').serialize());
+    submission.done(function(data) {
+      var ddlCategory = $('#discourseCategory');
+      $('#btnCheckSettings').button('reset');
+
+      if (!data.success) {
+        $('#checkError').removeClass('hidden');
+        ddlCategory.attr('disabled', 'disabled');
+        return;
+      }
+
+      $('#checkSuccess').removeClass('hidden');
+
+      if (data.categories) {
+        $.each(data.categories, function (key, value) {
+          ddlCategory.append($('<option></option>').val(value.id).html(value.name));
+        });
+        ddlCategory.removeAttr('disabled');
+      }
+    });
+  });
+
   $('input[type=checkbox]').on('click', function() {
     var submission;
     var checkboxValue = $(this).val();
+
     if (checkboxValue === "all")
       submission = $.post('/api/issues/bulk', gatherFormDataForIssues());
     else

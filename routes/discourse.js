@@ -2,7 +2,7 @@ var express = require('express');
 var router = express.Router();
 
 router.get('/discourse', function(req, res, next) {
-  var fullRepoName = req.selectedOwner + "/" + req.selectedRepo;
+  var fullRepoName = req.session.repo.owner + "/" + req.session.repo.name;
   var selectedRepo = req.session.user.repos.find(item => item.full_name === fullRepoName);
 
   var model = {
@@ -16,8 +16,10 @@ router.get('/discourse', function(req, res, next) {
 
   if (req.session.repo && req.session.repo.selectedIssues) {
     model.numSelectedIssues = req.session.repo.selectedIssues.length;
-    model.zeroSelectedIssues = model.numSelectedIssues > 0;
+    model.zeroSelectedIssues = model.numSelectedIssues === 0;
   }
+
+  model.issues = req.session.repo.issues.filter(item => req.session.repo.selectedIssues.find(sel => sel == item.number));
 
   res.render('discourse', model);
 });

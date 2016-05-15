@@ -1,9 +1,9 @@
-<h2>Discourse Credentials:</h2>
-<p>
-  Enter your Discourse Credentials so we can import your selected GitHub issues.
-</p>
-
 {{#if zeroSelectedIssues}}
+  <h2>Discourse Credentials:</h2>
+  <p>
+    Enter your Discourse Credentials so we can import your selected GitHub issues.
+  </p>
+
   <div class="alert alert-danger" role="alert">
     <p>
       <b>Oops!</b><br />
@@ -12,5 +12,65 @@
     <a href="/repos" class="btn btn-primary">Go Back</a>
   </div>
 {{else}}
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-lg-6">
+        <h2>Discourse Credentials:</h2>
+        <p>
+          Enter your Discourse Credentials so we can import your selected GitHub issues.
+        </p>
 
+        <form method="post" action="/api/discourse/save">
+          <div id="checkSuccess" class="alert alert-success hidden">Success! We were able to access your instance, please select a Category below.</div>
+          <div id="checkError" class="alert alert-danger hidden">Oops! We were unable to access your site using the settings you provided.</div>
+          <div class="form-group">
+            <label for="discourseUrl">Discourse URL:</label>
+            <input type="url" class="form-control" name="url" id="discourseUrl" placeholder="http://discourse.example.com" />
+          </div>
+          <div class="form-group">
+            <label for="discourseUsername">Discourse Username:</label>
+            <input type="text" class="form-control" name="username" id="discourseUsername" placeholder="Username" />
+          </div>
+          <div class="form-group">
+            <label for="discourseApiKey">Discourse API Key:</label>
+            <input type="text" class="form-control" name="apikey" id="discourseApiKey" placeholder="API Key" />
+          </div>
+          <div class="form-group">
+            <button type="button" id="btnCheckSettings" class="btn btn-primary" data-loading-text="Checking...">Check Settings</button>
+          </div>
+          <div class="form-group">
+            <label for="discourseCategory">Discourse Category:</label>
+            <select class="form-control" name="category" id="discourseCategory" disabled="disabled">
+              <option value="" class="keep">Select a Category</option>
+            </select>
+          </div>
+        </form>
+      </div>
+      <div class="col-lg-6">
+        <h2>Selected Issues:
+        <a href="/repos/{{selectedRepo.full_name}}" class="btn btn-default">Change Issue Selection</a></h2>
+        <p>
+          These issues below will be imported from
+          <a href="{{selectedRepo.html_url}}" target="_blank">{{selectedRepo.full_name}}</a>
+          into the Discourse instance provided.
+        </p>
+        <table class="table table-hover">
+          <thead>
+          <tr>
+            <th>#</th>
+            <th>Title</th>
+          </tr>
+          </thead>
+          <tbody>
+            {{#each issues}}
+              <tr>
+                <td>#{{number}}</td>
+                <td><a href="{{html_url}}" target="_blank">{{title}}</a></td>
+              </tr>
+            {{/each}}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 {{/if}}
