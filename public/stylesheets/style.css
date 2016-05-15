@@ -156,6 +156,10 @@ tr.selected {
   background-color: #FFFFCC;
 }
 
+.table-hover>tbody>tr.selected:hover {
+  background-color: #FFFFAA;
+}
+
 .alert p {
   font-size: 1.5rem;
   margin-bottom: 0;

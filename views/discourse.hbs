@@ -20,31 +20,40 @@
           Enter your Discourse Credentials so we can import your selected GitHub issues.
         </p>
 
-        <form method="post" action="/api/discourse/save">
-          <div id="checkSuccess" class="alert alert-success hidden">Success! We were able to access your instance, please select a Category below.</div>
-          <div id="checkError" class="alert alert-danger hidden">Oops! We were unable to access your site using the settings you provided.</div>
-          <div class="form-group">
-            <label for="discourseUrl">Discourse URL:</label>
-            <input type="url" class="form-control" name="url" id="discourseUrl" placeholder="http://discourse.example.com" />
-          </div>
-          <div class="form-group">
-            <label for="discourseUsername">Discourse Username:</label>
-            <input type="text" class="form-control" name="username" id="discourseUsername" placeholder="Username" />
-          </div>
-          <div class="form-group">
-            <label for="discourseApiKey">Discourse API Key:</label>
-            <input type="text" class="form-control" name="apikey" id="discourseApiKey" placeholder="API Key" />
-          </div>
-          <div class="form-group">
-            <button type="button" id="btnCheckSettings" class="btn btn-primary" data-loading-text="Checking...">Check Settings</button>
-          </div>
-          <div class="form-group">
-            <label for="discourseCategory">Discourse Category:</label>
-            <select class="form-control" name="category" id="discourseCategory" disabled="disabled">
-              <option value="" class="keep">Select a Category</option>
-            </select>
-          </div>
-        </form>
+        <div id="checkSuccess" class="alert alert-success hidden">Success! We were able to access your instance, please select a Category below.</div>
+        <div id="checkError" class="alert alert-danger hidden">Oops! We were unable to access your site using the settings you provided.</div>
+        <div class="form-group">
+          <label for="discourseUrl">Discourse URL:</label>
+          <input type="url" class="form-control" name="url" id="discourseUrl" value="{{discourse.url}}" placeholder="http://discourse.example.com" />
+        </div>
+        <div class="form-group">
+          <label for="discourseUsername">Discourse Username:</label>
+          <input type="text" class="form-control" name="username" id="discourseUsername" value="{{discourse.username}}" placeholder="Username" />
+        </div>
+        <div class="form-group">
+          <label for="discourseApiKey">Discourse API Key:</label>
+          <input type="text" class="form-control" name="api_key" id="discourseApiKey" value="{{discourse.api_key}}" placeholder="API Key" />
+        </div>
+        <div class="form-group">
+          <button type="button" id="btnCheckSettings" class="btn btn-primary" data-loading-text="Checking...">Check Settings</button>
+        </div>
+        <div class="form-group">
+          <label for="discourseCategory">Discourse Category:</label>
+          <select class="form-control" name="category" id="discourseCategory" {{#unless discourse.hasCategories}}disabled="disabled"{{/unless}}>
+            <option value="" class="keep">Select a Category</option>
+            {{#if discourse.hasCategories}}
+              {{#each discourse.categories}}
+                <option value="{{id}}">{{name}}</option>
+                {{#each subcategories}}
+                  <option value="{{id}}">&nbsp;&nbsp; {{name}}</option>
+                {{/each}}
+              {{/each}}
+            {{/if}}
+          </select>
+        </div>
+        <div class="form-group">
+          <button type="button" id="btnStartImport" class="btn btn-primary" disabled="disabled" data-loading-text="Importing...">Start Import</button>
+        </div>
       </div>
       <div class="col-lg-6">
         <h2>Selected Issues:
@@ -59,6 +68,7 @@
           <tr>
             <th>#</th>
             <th>Title</th>
+            <th class="text-center">Status</th>
           </tr>
           </thead>
           <tbody>
@@ -66,6 +76,7 @@
               <tr>
                 <td>#{{number}}</td>
                 <td><a href="{{html_url}}" target="_blank">{{title}}</a></td>
+                <td class="text-center"><i class="fa fa-circle-o" aria-hidden="true"></i></td>
               </tr>
             {{/each}}
           </tbody>

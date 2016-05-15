@@ -11,6 +11,7 @@ router.get('/discourse', function(req, res, next) {
     selectedRepo: selectedRepo,
     numSelectedIssues: 0,
     zeroSelectedIssues: true,
+    discourse: req.session.discourse,
     debug: req.config.debug
   };
 
@@ -18,6 +19,9 @@ router.get('/discourse', function(req, res, next) {
     model.numSelectedIssues = req.session.repo.selectedIssues.length;
     model.zeroSelectedIssues = model.numSelectedIssues === 0;
   }
+
+  if (req.session.discourse && req.session.discourse.categories)
+    model.discourse.hasCategories = req.session.discourse.categories.length > 0;
 
   model.issues = req.session.repo.issues.filter(item => req.session.repo.selectedIssues.find(sel => sel == item.number));
 
