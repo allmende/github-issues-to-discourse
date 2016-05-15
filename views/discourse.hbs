@@ -1,0 +1,16 @@
+<h2>Discourse Credentials:</h2>
+<p>
+  Enter your Discourse Credentials so we can import your selected GitHub issues.
+</p>
+
+{{#if zeroSelectedIssues}}
+  <div class="alert alert-danger" role="alert">
+    <p>
+      <b>Oops!</b><br />
+      Seems you have not selected any GitHub issues to import. Please go back and pick at least one issue.
+    </p>
+    <a href="/repos" class="btn btn-primary">Go Back</a>
+  </div>
+{{else}}
+
+{{/if}}

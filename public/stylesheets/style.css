@@ -55,6 +55,16 @@ body {
   padding-bottom: 2rem;
 }
 
+.nav .btn-primary:hover {
+  background-color: #286090;
+  border-color: #204d74;
+}
+
+.nav .btn-info:hover {
+  background-color: #31b0d5;
+  border-color: #269abc;
+}
+
 .repo-badge {
   background-color: #FFF;
   border: 1px solid #666;

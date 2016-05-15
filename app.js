@@ -58,6 +58,7 @@ app.get('/auth/github/callback', passport.authenticate('github', { failureRedire
 app.get('/', require('./routes/index'));
 app.get('/repos', ensureAuthenticated, require('./routes/repos'));
 app.get('/repos/:owner/:name', ensureAuthenticated, require('./routes/issues'));
+app.get('/discourse', ensureAuthenticated, require('./routes/discourse'));
 app.get('/logout', require('./routes/logout'));
 
 // Define the POST requests
