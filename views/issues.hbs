@@ -14,32 +14,25 @@
 <ul class="nav nav-pills">
   <li role="presentation" class="dropdown">
     <a class="dropdown-toggle btn btn-default" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
-      Filter Issues <span class="caret"></span>
+      Filter by Label <span class="caret"></span>
     </a>
     <ul class="dropdown-menu">
-      <li><a href="?no_label=true">-- empty --</a></li>
       {{#each issueLabels}}
-        <li><a href="?filter={{name}}">{{name}}</a></li>
+        <li {{#if selected}}class="selected"{{/if}}><a href="{{url}}">{{name}}</a></li>
       {{/each}}
     </ul>
   </li>
   <li role="presentation" {{#if hideClearFilter}}class="disabled"{{/if}}>
-    <a href="/repos/{{selectedRepo.full_name}}"><i class="fa fa-close"></i> Clear Filter</a>
+    <a href="{{clearFilterUrl}}"><i class="fa fa-close"></i> Clear Filter</a>
   </li>
   <li role="presentation">
     <span class="selected-status">
       <span class="numSelectedIssues">{{numSelectedIssues}}</span> of {{numTotalIssues}} selected
     </span>
   </li>
-  {{#if showSelectedButton}}
-    <li role="presentation">
-      <a href="?only_selected=true" class="btn btn-default">Show Selected</a>
-    </li>
-  {{else}}
-    <li role="presentation">
-      <a href="/repos/{{selectedRepo.full_name}}" class="btn btn-default">Show All</a>
-    </li>
-  {{/if}}
+  <li role="presentation">
+    <a href="{{showSelectedUrl}}" class="btn btn-default">{{#if showSelectedButton}}Show Selected{{else}}Show All{{/if}}</a>
+  </li>
   <li role="presentation" class="pull-right">
     <button type="submit" class="btn btn-primary">Continue</button>
   </li>

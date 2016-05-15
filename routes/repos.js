@@ -26,6 +26,9 @@ router.get('/repos', function(req, res, next) {
       .sort(function(a, b) { return b.open_issues_count - a.open_issues_count; });
     req.session.user.repos = model.repos;
 
+    if (model.repos.length === 0)
+      model.no_repos = true;
+
     if (model.debug) {
       model.debugData = [
         { name: 'user', data: JSON.stringify(model.user) },

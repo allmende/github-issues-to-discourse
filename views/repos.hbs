@@ -3,6 +3,17 @@
   Select the repository with issues you want to import into Discourse.
 </p>
 
+{{#if no_repos}}
+  <div class="alert alert-success" role="alert">
+    <p>
+      <b>Congratulations!</b><br />
+      It seems you do not have any open issues in the repositories associated to your GitHub account.
+      Unfortunately, that means our tool won't be of any assistance to you, but should an issue be
+      created, we hope you return!
+    </p>
+  </div>
+{{/if}}
+
 {{#each repos}}
   <div class="repo-badge">
     <div class="count">{{open_issues_count}}<div class="describe">issue(s)</div></div>

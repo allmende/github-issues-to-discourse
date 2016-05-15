@@ -29,13 +29,31 @@ router.get('/repos/:owner/:name', function(req, res, next) {
     title: req.config.title + " - Open Issues for Repository " + fullRepoName,
     user: req.session.user.profile,
     selectedRepo: selectedRepo,
+    selectedFilter: '',
     numTotalIssues: selectedRepo.open_issues_count,
     numSelectedIssues: 0,
     hideClearFilter: true,
     showSelectedButton: true,
+    showSelectedUrl: '/repos/' + fullRepoName,
+    clearFilterUrl: '/repos/' + fullRepoName,
     debug: req.config.debug
   };
 
+  // Build the Clear Filter/Show Selected URLs
+  if (req.query.filter && req.query.only_selected) {
+    model.showSelectedUrl += '?filter=' + req.query.filter;
+    model.clearFilterUrl += '?only_selected=true';
+  } else if (req.query.no_label && req.query.only_selected) {
+    model.showSelectedUrl += '?no_label=true';
+    model.clearFilterUrl += '?only_selected=true';
+  } else if (req.query.filter)
+    model.showSelectedUrl += '?filter=' + req.query.filter + '&only_selected=true';
+  else if (req.query.no_label)
+    model.showSelectedUrl += '?no_label=true' + '&only_selected=true';
+  else if (!req.query.only_selected)
+    model.showSelectedUrl += '?only_selected=true';
+
+  // Store the Repo Information in Session, reset it if the repo changes
   if (!req.session.repo || req.session.repo.owner !== req.selectedOwner || req.session.repo.name !== req.selectedRepo)
     req.session.repo = { owner: req.selectedOwner, name: req.selectedRepo };
 
@@ -51,7 +69,19 @@ router.get('/repos/:owner/:name', function(req, res, next) {
       return;
     }
 
-    model.issueLabels = res;
+    // Store the Issue Labels and add a few properties
+    model.issueLabels = res.map(item => {
+        item.url = '?filter=' + item.name + ((req.query.only_selected) ? '&only_selected=true' : '');
+        item.selected = req.query.filter === item.name;
+        return item;
+      });
+    
+    // Add an empty item to the Issue Labels
+    model.issueLabels.splice(0, 0, {
+        name: '-- empty --',
+        selected: req.query.no_label,
+        url: '?no_label=true' + ((req.query.only_selected) ? '&only_selected=true' : '')
+      });
     req.session.repo.issueLabels = model.issueLabels;
 
     github.issues.repoIssues({ user: req.session.repo.owner, repo: req.session.repo.name, state: 'open' }, function(err, res) {
@@ -61,11 +91,13 @@ router.get('/repos/:owner/:name', function(req, res, next) {
         return;
       }
 
+      // Store the Repo Issues and add a label tags property
       model.issues = res.map(item => {
           item.labelTags = item.labels.map(label => label.name).join(', ');
           return item;
         });
 
+      // Check to see if any issues have been selected and set their selected state
       if (req.session.repo.selectedIssues) {
         model.numSelectedIssues = req.session.repo.selectedIssues.length;
         req.session.repo.selectedIssues.forEach(issue => {
@@ -77,19 +109,21 @@ router.get('/repos/:owner/:name', function(req, res, next) {
 
       req.session.repo.issues = model.issues;
 
+      // Apply the Label Filter
       if (req.query.filter) {
         model.issues = model.issues.filter(item => item.labelTags.indexOf(req.query.filter) !== -1);
         model.hideClearFilter = false;
       }
 
+      // Apply the Label is Empty Filter
       if (req.query.no_label) {
         model.issues = model.issues.filter(item => item.labelTags.length === 0);
         model.hideClearFilter = false;
       }
 
+      // Filter out un-selected items
       if (req.query.only_selected) {
         model.issues = model.issues.filter(item => item.selected);
-        model.hideClearFilter = false;
         model.showSelectedButton = false;
       }
 
