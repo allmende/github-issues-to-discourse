@@ -1,5 +1,6 @@
 var express = require('express');
 var github = require("../lib/github")();
+var Promise = require('bluebird');
 var router = express.Router();
 
 router.param('owner', function(req, res, next, owner) {
@@ -34,8 +35,7 @@ router.get('/repos/:owner/:name', function(req, res, next) {
     hideClearFilter: true,
     showSelectedButton: true,
     showSelectedUrl: '/repos/' + fullRepoName,
-    clearFilterUrl: '/repos/' + fullRepoName,
-    debug: req.config.debug
+    clearFilterUrl: '/repos/' + fullRepoName
   };
 
   // Build the Clear Filter/Show Selected URLs
@@ -61,49 +61,39 @@ router.get('/repos/:owner/:name', function(req, res, next) {
     token: req.user.accessToken
   });
 
-  github.issues.getLabels({ user: req.session.repo.owner, repo: req.session.repo.name }, function(err, labelResult) {
-    if (err) {
-      // TODO: Figure out how to manage this
-      console.log(err);
-      return;
-    }
-
+  var githubGetLabels = Promise.promisify(github.issues.getLabels, {context: github});
+  githubGetLabels({ user: req.session.repo.owner, repo: req.session.repo.name }).then(function (labelResult) {
     // Store the Issue Labels and add a few properties
     model.issueLabels = labelResult.map(item => {
-        item.url = '?filter=' + item.name + ((req.query.only_selected) ? '&only_selected=true' : '');
-        item.selected = req.query.filter === item.name;
-        return item;
-      });
-    
+      item.url = '?filter=' + item.name + ((req.query.only_selected) ? '&only_selected=true' : '');
+      item.selected = req.query.filter === item.name;
+      return item;
+    });
+
     // Add an empty item to the Issue Labels
     model.issueLabels.splice(0, 0, {
-        name: '-- empty --',
-        selected: req.query.no_label,
-        url: '?no_label=true' + ((req.query.only_selected) ? '&only_selected=true' : '')
-      });
+      name: '-- empty --',
+      selected: req.query.no_label,
+      url: '?no_label=true' + ((req.query.only_selected) ? '&only_selected=true' : '')
+    });
     req.session.repo.issueLabels = model.issueLabels;
-
-    github.issues.repoIssues({ user: req.session.repo.owner, repo: req.session.repo.name, state: 'open' }, function(err, issueResult) {
-      if (err) {
-        // TODO: Figure out how to manage this
-        console.log(err);
-        return;
-      }
-
+  }).then(function() {
+    var githubRepoIssues = Promise.promisify(github.issues.repoIssues, {context: github});
+    githubRepoIssues({ user: req.session.repo.owner, repo: req.session.repo.name, state: 'open' }).then(function (issueResult) {
       // Store the Repo Issues and add a label tags property
       model.issues = issueResult.map(item => {
-          item.labelTags = item.labels.map(label => label.name).join(', ');
-          return item;
-        });
+        item.labelTags = item.labels.map(label => label.name).join(', ');
+        return item;
+      });
 
       // Check to see if any issues have been selected and set their selected state
       if (req.session.repo.selectedIssues) {
         model.numSelectedIssues = req.session.repo.selectedIssues.length;
         req.session.repo.selectedIssues.forEach(issue => {
-            var selectedIssue = model.issues.find(item => item.number == issue)
-            if (selectedIssue)
-              selectedIssue.selected = true;
-          });
+          var selectedIssue = model.issues.find(item => item.number == issue)
+          if (selectedIssue)
+            selectedIssue.selected = true;
+        });
       }
 
       req.session.repo.issues = model.issues;
@@ -127,15 +117,7 @@ router.get('/repos/:owner/:name', function(req, res, next) {
       }
 
       model.showBottomButton = model.issues.length > 10;
-
-      if (model.debug) {
-        model.debugData = [{ name: 'user', data: JSON.stringify(model.user) },
-          { name: 'selectedRepo', data: JSON.stringify(model.selectedRepo)},
-          { name: 'issues', data: JSON.stringify(model.issues)},
-          { name: 'issueLabels', data: JSON.stringify(model.issueLabels)},
-          { name: 'hideClearFilter', data: model.hideClearFilter}];
-      }
-
+    }).then(function() {
       res.render('issues', model);
     });
   });

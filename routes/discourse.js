@@ -11,8 +11,7 @@ router.get('/discourse', function(req, res, next) {
     selectedRepo: selectedRepo,
     numSelectedIssues: 0,
     zeroSelectedIssues: true,
-    discourse: req.session.discourse,
-    debug: req.config.debug
+    discourse: req.session.discourse
   };
 
   if (req.session.repo && req.session.repo.selectedIssues) {

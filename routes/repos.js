@@ -1,13 +1,13 @@
 var express = require('express');
 var github = require("../lib/github")();
+var Promise = require('bluebird');
 var router = express.Router();
 
 /* GET repos listing. */
 router.get('/repos', function(req, res, next) {
   var model = {
     title: req.config.title + " - Repositories",
-    user: req.session.user.profile,
-    debug: req.config.debug
+    user: req.session.user.profile
   };
 
   github.authenticate({
@@ -15,26 +15,15 @@ router.get('/repos', function(req, res, next) {
     token: req.user.accessToken
   });
 
-  github.repos.getAll({}, function(err, repoResult) {
-    if (err) {
-      // TODO: Figure out how to manage this
-      next(err);
-    }
-
+  var githubGetAllRepos = Promise.promisify(github.repos.getAll, {context: github});
+  githubGetAllRepos({}).then(function (repoResult) {
     model.repos = repoResult.filter(item => item.open_issues_count > 0)
       .sort(function(a, b) { return b.open_issues_count - a.open_issues_count; });
     req.session.user.repos = model.repos;
 
     if (model.repos.length === 0)
       model.no_repos = true;
-
-    if (model.debug) {
-      model.debugData = [
-        { name: 'user', data: JSON.stringify(model.user) },
-        { name: 'repos', data: JSON.stringify(model.repos)}
-      ];
-    }
-
+  }).then(function() {
     res.render('repos', model);
   });
 });

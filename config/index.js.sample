@@ -4,7 +4,6 @@ var config = {
            github_client_id:     "GITHUB CLIENT ID",
            github_client_secret: "GITHUB CLIENT SECRET",
            session_secret:       "SESSION SECRET SIGN PHRASE",
-           debug:                false,
 
            github_api: {
              version:            "3.0.0",
@@ -23,7 +22,6 @@ var config = {
            github_client_id:     "GITHUB CLIENT ID",
            github_client_secret: "GITHUB CLIENT SECRET",
            session_secret:       "SESSION SECRET SIGN PHRASE",
-           debug:                false,
 
            github_api: {
              version:            "3.0.0",
@@ -42,7 +40,6 @@ var config = {
            github_client_id:     "GITHUB CLIENT ID",
            github_client_secret: "GITHUB CLIENT SECRET",
            session_secret:       "SESSION SECRET SIGN PHRASE",
-           debug:                false,
 
            github_api: {
              version:            "3.0.0",
