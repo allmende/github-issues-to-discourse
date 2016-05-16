@@ -22,7 +22,6 @@ router.param('name', function(req, res, next, name) {
 
 /* GET issues listing. */
 router.get('/repos/:owner/:name', function(req, res, next) {
-  var oThis = res;
   var fullRepoName = req.selectedOwner + "/" + req.selectedRepo;
   var selectedRepo = req.session.user.repos.find(item => item.full_name === fullRepoName);
   var model = {
@@ -62,7 +61,7 @@ router.get('/repos/:owner/:name', function(req, res, next) {
     token: req.user.accessToken
   });
 
-  github.issues.getLabels({ user: req.session.repo.owner, repo: req.session.repo.name }, function(err, res) {
+  github.issues.getLabels({ user: req.session.repo.owner, repo: req.session.repo.name }, function(err, labelResult) {
     if (err) {
       // TODO: Figure out how to manage this
       console.log(err);
@@ -70,7 +69,7 @@ router.get('/repos/:owner/:name', function(req, res, next) {
     }
 
     // Store the Issue Labels and add a few properties
-    model.issueLabels = res.map(item => {
+    model.issueLabels = labelResult.map(item => {
         item.url = '?filter=' + item.name + ((req.query.only_selected) ? '&only_selected=true' : '');
         item.selected = req.query.filter === item.name;
         return item;
@@ -84,7 +83,7 @@ router.get('/repos/:owner/:name', function(req, res, next) {
       });
     req.session.repo.issueLabels = model.issueLabels;
 
-    github.issues.repoIssues({ user: req.session.repo.owner, repo: req.session.repo.name, state: 'open' }, function(err, res) {
+    github.issues.repoIssues({ user: req.session.repo.owner, repo: req.session.repo.name, state: 'open' }, function(err, issueResult) {
       if (err) {
         // TODO: Figure out how to manage this
         console.log(err);
@@ -92,7 +91,7 @@ router.get('/repos/:owner/:name', function(req, res, next) {
       }
 
       // Store the Repo Issues and add a label tags property
-      model.issues = res.map(item => {
+      model.issues = issueResult.map(item => {
           item.labelTags = item.labels.map(label => label.name).join(', ');
           return item;
         });
@@ -137,7 +136,7 @@ router.get('/repos/:owner/:name', function(req, res, next) {
           { name: 'hideClearFilter', data: model.hideClearFilter}];
       }
 
-      oThis.render('issues', model);
+      res.render('issues', model);
     });
   });
 });
