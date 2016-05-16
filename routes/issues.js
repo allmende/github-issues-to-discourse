@@ -38,6 +38,10 @@ router.get('/repos/:owner/:name', function(req, res, next) {
     clearFilterUrl: '/repos/' + fullRepoName
   };
 
+  // Promises
+  var githubGetLabels = Promise.promisify(github.issues.getLabels, {context: github});
+  var githubRepoIssues = Promise.promisify(github.issues.repoIssues, {context: github});
+
   // Build the Clear Filter/Show Selected URLs
   if (req.query.filter && req.query.only_selected) {
     model.showSelectedUrl += '?filter=' + req.query.filter;
@@ -61,7 +65,6 @@ router.get('/repos/:owner/:name', function(req, res, next) {
     token: req.user.accessToken
   });
 
-  var githubGetLabels = Promise.promisify(github.issues.getLabels, {context: github});
   githubGetLabels({ user: req.session.repo.owner, repo: req.session.repo.name }).then(function(labelResult) {
     // Store the Issue Labels and add a few properties
     model.issueLabels = labelResult.map(item => {
@@ -78,7 +81,6 @@ router.get('/repos/:owner/:name', function(req, res, next) {
     });
     req.session.repo.issueLabels = model.issueLabels;
   }).then(function() {
-    var githubRepoIssues = Promise.promisify(github.issues.repoIssues, {context: github});
     return githubRepoIssues({user: req.session.repo.owner, repo: req.session.repo.name, state: 'open'});
   }).then(function(issueResult) {
     // Store the Repo Issues and add a label tags property

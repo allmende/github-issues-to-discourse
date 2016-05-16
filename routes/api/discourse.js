@@ -33,6 +33,14 @@ router.post('/api/discourse/import', function(req, res, next) {
   var username = req.session.discourse.username;
   var api_key = req.session.discourse.api_key;
   var response_data = {};
+  var api = new Discourse(url, api_key, username);
+
+  // Promises
+  var discourseCreateTopic = Promise.promisify(api.createTopic, {context: api});
+  var discourseReplyToTopic = Promise.promisify(api.replyToTopic, {context: api});
+  var githubGetComments = Promise.promisify(github.issues.getComments, {context: github});
+  var githubCreateComment = Promise.promisify(github.issues.createComment, {context: github});
+  var githubEditIssue = Promise.promisify(github.issues.edit, {context: github});
 
   // Verify Issue still exists
   var issue = req.session.repo.issues.find(item => item.number == issue_number);
@@ -41,8 +49,6 @@ router.post('/api/discourse/import', function(req, res, next) {
     return;
   }
 
-  // Setup APIs
-  var api = new Discourse(url, api_key, username);
   github.authenticate({
     type: "oauth",
     token: req.user.accessToken
@@ -52,22 +58,19 @@ router.post('/api/discourse/import', function(req, res, next) {
   var issue_date = new Date(issue.created_at).toString();
   var topic_body = "<i>From @" + issue.user.login + " on " + issue_date + "</i><br /><br />"
     + issue.body + "<br /><br />" + "<i>Copied from original issue: " + issue.html_url + "</i>";
-  
-  var discourseCreateTopic = Promise.promisify(api.createTopic, {context: api});
+
   discourseCreateTopic(issue.title, topic_body, category).then(function(createResult) {
     createResult = JSON.parse(createResult);
     response_data.topic_id = createResult.topic_id;
     response_data.topic_url = (url.endsWith('/')) ? url : url + '/';
     response_data.topic_url += 't/' + createResult.topic_slug + '/' + response_data.topic_id;    
   }).then(function() {
-    var githubGetComments = Promise.promisify(github.issues.getComments, {context: github});
     return githubGetComments({user: req.session.repo.owner, repo: req.session.repo.name, number: issue_number});
   }).then(function(commentResult) {
     commentResult.forEach(item => {
       var comment_date = new Date(issue.created_at).toString();
       var comment_body = "<i>From @" + item.user.login + " on " + comment_date + "</i><br /><br />" + item.body;
 
-      var discourseReplyToTopic = Promise.promisify(api.replyToTopic, {context: api});
       discourseReplyToTopic(comment_body, response_data.topic_id);
     });
   }).then(function() {
@@ -79,7 +82,6 @@ router.post('/api/discourse/import', function(req, res, next) {
       number: issue_number,
       body: create_comment_body
     };
-    var githubCreateComment = Promise.promisify(github.issues.createComment, {context: github});
     return githubCreateComment(create_comment_parameters);
   }).then(function(createCommentResult) {
     // Close GitHub Issue
@@ -89,7 +91,6 @@ router.post('/api/discourse/import', function(req, res, next) {
       number: issue_number,
       state: 'closed'
     };
-    var githubEditIssue = Promise.promisify(github.issues.edit, {context: github});
     return githubEditIssue(edit_issue_parameters);
   }).then(function(editIssueResult) {
     req.session.repo.selectedIssues = req.session.repo.selectedIssues.filter(item => item != issue_number);
