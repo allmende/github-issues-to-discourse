@@ -24,4 +24,16 @@ router.post('/api/discourse/check', function(req, res, next) {
   res.send({success: true, categories: categories});
 });
 
+router.post('/api/discourse/import', function(req, res, next) {
+  var category = req.body.category;
+  var issue_number = req.body.issue_number;
+  var url = req.session.discourse.url;
+  var username = req.session.discourse.username;
+  var api_key = req.session.discourse.api_key;
+
+  // TODO: Grab GitHub Issue Data, the description and comments, store for later use.
+  //var api = new Discourse(url, api_key, username);
+  res.send({success: false, issue_number: issue_number});
+});
+
 module.exports = router;
