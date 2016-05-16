@@ -16,7 +16,7 @@ router.get('/repos', function(req, res, next) {
   });
 
   var githubGetAllRepos = Promise.promisify(github.repos.getAll, {context: github});
-  githubGetAllRepos({}).then(function (repoResult) {
+  githubGetAllRepos({}).then(function(repoResult) {
     model.repos = repoResult.filter(item => item.open_issues_count > 0)
       .sort(function(a, b) { return b.open_issues_count - a.open_issues_count; });
     req.session.user.repos = model.repos;

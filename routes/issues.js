@@ -62,7 +62,7 @@ router.get('/repos/:owner/:name', function(req, res, next) {
   });
 
   var githubGetLabels = Promise.promisify(github.issues.getLabels, {context: github});
-  githubGetLabels({ user: req.session.repo.owner, repo: req.session.repo.name }).then(function (labelResult) {
+  githubGetLabels({ user: req.session.repo.owner, repo: req.session.repo.name }).then(function(labelResult) {
     // Store the Issue Labels and add a few properties
     model.issueLabels = labelResult.map(item => {
       item.url = '?filter=' + item.name + ((req.query.only_selected) ? '&only_selected=true' : '');
@@ -79,47 +79,46 @@ router.get('/repos/:owner/:name', function(req, res, next) {
     req.session.repo.issueLabels = model.issueLabels;
   }).then(function() {
     var githubRepoIssues = Promise.promisify(github.issues.repoIssues, {context: github});
-    githubRepoIssues({ user: req.session.repo.owner, repo: req.session.repo.name, state: 'open' }).then(function (issueResult) {
-      // Store the Repo Issues and add a label tags property
-      model.issues = issueResult.map(item => {
-        item.labelTags = item.labels.map(label => label.name).join(', ');
-        return item;
-      });
-
-      // Check to see if any issues have been selected and set their selected state
-      if (req.session.repo.selectedIssues) {
-        model.numSelectedIssues = req.session.repo.selectedIssues.length;
-        req.session.repo.selectedIssues.forEach(issue => {
-          var selectedIssue = model.issues.find(item => item.number == issue)
-          if (selectedIssue)
-            selectedIssue.selected = true;
-        });
-      }
-
-      req.session.repo.issues = model.issues;
-
-      // Apply the Label Filter
-      if (req.query.filter) {
-        model.issues = model.issues.filter(item => item.labelTags.indexOf(req.query.filter) !== -1);
-        model.hideClearFilter = false;
-      }
-
-      // Apply the Label is Empty Filter
-      if (req.query.no_label) {
-        model.issues = model.issues.filter(item => item.labelTags.length === 0);
-        model.hideClearFilter = false;
-      }
-
-      // Filter out un-selected items
-      if (req.query.only_selected) {
-        model.issues = model.issues.filter(item => item.selected);
-        model.showSelectedButton = false;
-      }
-
-      model.showBottomButton = model.issues.length > 10;
-    }).then(function() {
-      res.render('issues', model);
+    return githubRepoIssues({user: req.session.repo.owner, repo: req.session.repo.name, state: 'open'});
+  }).then(function(issueResult) {
+    // Store the Repo Issues and add a label tags property
+    model.issues = issueResult.map(item => {
+      item.labelTags = item.labels.map(label => label.name).join(', ');
+      return item;
     });
+
+    // Check to see if any issues have been selected and set their selected state
+    if (req.session.repo.selectedIssues) {
+      model.numSelectedIssues = req.session.repo.selectedIssues.length;
+      req.session.repo.selectedIssues.forEach(issue => {
+        var selectedIssue = model.issues.find(item => item.number == issue)
+        if (selectedIssue)
+          selectedIssue.selected = true;
+      });
+    }
+
+    req.session.repo.issues = model.issues;
+
+    // Apply the Label Filter
+    if (req.query.filter) {
+      model.issues = model.issues.filter(item => item.labelTags.indexOf(req.query.filter) !== -1);
+      model.hideClearFilter = false;
+    }
+
+    // Apply the Label is Empty Filter
+    if (req.query.no_label) {
+      model.issues = model.issues.filter(item => item.labelTags.length === 0);
+      model.hideClearFilter = false;
+    }
+
+    // Filter out un-selected items
+    if (req.query.only_selected) {
+      model.issues = model.issues.filter(item => item.selected);
+      model.showSelectedButton = false;
+    }
+
+    model.showBottomButton = model.issues.length > 10;
+    res.render('issues', model);
   });
 });
 

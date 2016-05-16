@@ -1,6 +1,7 @@
 var express = require('express');
 var github = require("../../lib/github")();
 var Discourse = require('discourse-api');
+var Promise = require('bluebird');
 var router = express.Router();
 
 router.post('/api/discourse/check', function(req, res, next) {
@@ -31,6 +32,7 @@ router.post('/api/discourse/import', function(req, res, next) {
   var url = req.session.discourse.url;
   var username = req.session.discourse.username;
   var api_key = req.session.discourse.api_key;
+  var response_data = {};
 
   // Verify Issue still exists
   var issue = req.session.repo.issues.find(item => item.number == issue_number);
@@ -50,63 +52,48 @@ router.post('/api/discourse/import', function(req, res, next) {
   var issue_date = new Date(issue.created_at).toString();
   var topic_body = "<i>From @" + issue.user.login + " on " + issue_date + "</i><br /><br />"
     + issue.body + "<br /><br />" + "<i>Copied from original issue: " + issue.html_url + "</i>";
-  api.createTopic(issue.title, topic_body, category, function(err, createResult) {
-    if (err) {
-      console.log(err);
-      res.send({success: false, issue_number: issue_number});
-      return;
-    }
-
+  
+  var discourseCreateTopic = Promise.promisify(api.createTopic, {context: api});
+  discourseCreateTopic(issue.title, topic_body, category).then(function(createResult) {
     createResult = JSON.parse(createResult);
-    var topic_id = createResult.topic_id;
-    var topic_url = (url.endsWith('/')) ? url : url + '/';
-    topic_url += 't/' + createResult.topic_slug + '/' + topic_id;
+    response_data.topic_id = createResult.topic_id;
+    response_data.topic_url = (url.endsWith('/')) ? url : url + '/';
+    response_data.topic_url += 't/' + createResult.topic_slug + '/' + response_data.topic_id;    
+  }).then(function() {
+    var githubGetComments = Promise.promisify(github.issues.getComments, {context: github});
+    return githubGetComments({user: req.session.repo.owner, repo: req.session.repo.name, number: issue_number});
+  }).then(function(commentResult) {
+    commentResult.forEach(item => {
+      var comment_date = new Date(issue.created_at).toString();
+      var comment_body = "<i>From @" + item.user.login + " on " + comment_date + "</i><br /><br />" + item.body;
 
-    github.issues.getComments({user: req.session.repo.owner, repo: req.session.repo.name, number: issue_number}, function(err, commentResult) {
-      if (err) {
-        console.log(err);
-        res.send({success: false, issue_number: issue_number});
-        return;
-      }
-
-      var comments = commentResult;
-      comments.forEach(item => {
-        var comment_date = new Date(issue.created_at).toString();
-        var comment_body = "<i>From @" + item.user.login + " on " + comment_date + "</i><br /><br />" + item.body;
-
-        api.replyToTopic(comment_body, topic_id, function(err, replyResult) {
-          if (err) {
-            console.log(err);
-            res.send({success: false, issue_number: issue_number});
-            return;
-          }
-        });
-      });
-
-      // Create GitHub Comment
-      var create_comment_body = "This issue was moved to " + topic_url;
-      var create_comment_parameters = {user: req.session.repo.owner, repo: req.session.repo.name, number: issue_number, body: create_comment_body};
-      github.issues.createComment(create_comment_parameters, function(err, createCommentResult) {
-        if (err) {
-          console.log(err);
-          res.send({success: false, issue_number: issue_number});
-          return;
-        }
-
-        // Close GitHub Issue
-        var edit_issue_parameters = {user: req.session.repo.owner, repo: req.session.repo.name, number: issue_number, state: 'closed'};
-        github.issues.edit(edit_issue_parameters, function(err, editIssueResult) {
-          if (err) {
-            console.log(err);
-            res.send({success: false, issue_number: issue_number});
-            return;
-          }
-
-          req.session.repo.issues = req.session.repo.issues.filter(item => item.number != issue_number);
-          res.send({success: true, issue_number: issue_number});
-        });
-      });
+      var discourseReplyToTopic = Promise.promisify(api.replyToTopic, {context: api});
+      discourseReplyToTopic(comment_body, response_data.topic_id);
     });
+  }).then(function() {
+    // Create GitHub Comment
+    var create_comment_body = "This issue was moved to " + response_data.topic_url;
+    var create_comment_parameters = {
+      user: req.session.repo.owner,
+      repo: req.session.repo.name,
+      number: issue_number,
+      body: create_comment_body
+    };
+    var githubCreateComment = Promise.promisify(github.issues.createComment, {context: github});
+    return githubCreateComment(create_comment_parameters);
+  }).then(function(createCommentResult) {
+    // Close GitHub Issue
+    var edit_issue_parameters = {
+      user: req.session.repo.owner,
+      repo: req.session.repo.name,
+      number: issue_number,
+      state: 'closed'
+    };
+    var githubEditIssue = Promise.promisify(github.issues.edit, {context: github});
+    return githubEditIssue(edit_issue_parameters);
+  }).then(function(editIssueResult) {
+    req.session.repo.issues = req.session.repo.issues.filter(item => item.number != issue_number);
+    res.send({success: true, issue_number: issue_number});
   });
 });
 
