@@ -32,19 +32,21 @@ router.post('/api/discourse/import', function(req, res, next) {
   var username = req.session.discourse.username;
   var api_key = req.session.discourse.api_key;
 
-  // Create Topic at Discourse Instance
-  var api = new Discourse(url, api_key, username);
+  // Verify Issue still exists
   var issue = req.session.repo.issues.find(item => item.number == issue_number);
   if (!issue) {
     res.send({success: false, issue_number: issue_number});
     return;
   }
 
+  // Setup APIs
+  var api = new Discourse(url, api_key, username);
   github.authenticate({
     type: "oauth",
     token: req.user.accessToken
   });
 
+  // Create Topic at Discourse Instance
   var issue_date = new Date(issue.created_at).toString();
   var topic_body = "<i>From @" + issue.user.login + " on " + issue_date + "</i><br /><br />"
     + issue.body + "<br /><br />" + "<i>Copied from original issue: " + issue.html_url + "</i>";
