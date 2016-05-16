@@ -119,6 +119,8 @@ router.get('/repos/:owner/:name', function(req, res, next) {
 
     model.showBottomButton = model.issues.length > 10;
     res.render('issues', model);
+  }).catch(function(e) {
+    res.redirect('/error');
   });
 });
 

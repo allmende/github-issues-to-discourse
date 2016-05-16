@@ -25,6 +25,8 @@ router.get('/repos', function(req, res, next) {
       model.no_repos = true;
   }).then(function() {
     res.render('repos', model);
+  }).catch(function(e) {
+    res.redirect('/error');
   });
 });
 

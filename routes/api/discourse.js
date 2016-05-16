@@ -92,8 +92,11 @@ router.post('/api/discourse/import', function(req, res, next) {
     var githubEditIssue = Promise.promisify(github.issues.edit, {context: github});
     return githubEditIssue(edit_issue_parameters);
   }).then(function(editIssueResult) {
+    req.session.repo.selectedIssues = req.session.repo.selectedIssues.filter(item => item != issue_number);
     req.session.repo.issues = req.session.repo.issues.filter(item => item.number != issue_number);
     res.send({success: true, issue_number: issue_number});
+  }).catch(function(e) {
+    res.send({success: false, issue_number: issue_number});
   });
 });
 
