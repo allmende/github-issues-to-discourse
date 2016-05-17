@@ -26,6 +26,11 @@ router.post('/api/discourse/check', function(req, res, next) {
   res.send({success: true, categories: categories});
 });
 
+router.post('/api/discourse/status', function(req, res, next) {
+  var issues = req.session.repo.issues.filter(item => req.session.repo.selectedIssues.find(sel => sel == item.number));
+  res.send({issues: issues});
+});
+
 router.post('/api/discourse/import', function(req, res, next) {
   var category = req.body.category;
   var issue_number = req.body.issue_number;
@@ -67,11 +72,11 @@ router.post('/api/discourse/import', function(req, res, next) {
   }).then(function() {
     return githubGetComments({user: req.session.repo.owner, repo: req.session.repo.name, number: issue_number});
   }).then(function(commentResult) {
-    commentResult.forEach(item => {
-      var comment_date = new Date(issue.created_at).toString();
+    return Promise.each(commentResult, item => {
+      var comment_date = new Date(item.created_at).toString();
       var comment_body = "<i>From @" + item.user.login + " on " + comment_date + "</i><br /><br />" + item.body;
 
-      discourseReplyToTopic(comment_body, response_data.topic_id);
+      return discourseReplyToTopic(comment_body, response_data.topic_id);
     });
   }).then(function() {
     // Create GitHub Comment
@@ -93,11 +98,19 @@ router.post('/api/discourse/import', function(req, res, next) {
     };
     return githubEditIssue(edit_issue_parameters);
   }).then(function(editIssueResult) {
-    req.session.repo.selectedIssues = req.session.repo.selectedIssues.filter(item => item != issue_number);
-    req.session.repo.issues = req.session.repo.issues.filter(item => item.number != issue_number);
-    res.send({success: true, issue_number: issue_number});
+    req.session.repo.issues = req.session.repo.issues.map(item => {
+      if (item.number == issue_number)
+        item.status = 'success';
+      return item;
+    });
+    res.send({success: true});
   }).catch(function(e) {
-    res.send({success: false, issue_number: issue_number});
+    req.session.repo.issues = req.session.repo.issues.map(item => {
+      if (item.number == issue_number)
+        item.status = 'error';
+      return item;
+    });
+    res.send({success: true});
   });
 });
 

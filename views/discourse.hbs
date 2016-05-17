@@ -79,8 +79,8 @@
                 <td>#{{number}}</td>
                 <td><a href="{{html_url}}" target="_blank">{{title}}</a></td>
                 <td class="text-center">
-                  <i class="fa fa-circle-o" id="icon{{number}}" aria-hidden="true"></i>
-                  <input type="hidden" class="issue-numbers" id="status{{number}}" data-completed="false" name="issue{{number}}" value="{{number}}" />
+                  <i class="fa {{classNames}}" id="icon{{number}}" aria-hidden="true"></i>
+                  <input type="hidden" class="issue-numbers" id="status{{number}}" data-completed="{{#if isCompleted}}true{{else}}false{{/if}}" name="issue{{number}}" value="{{number}}" />
                 </td>
               </tr>
             {{/each}}

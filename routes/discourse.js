@@ -22,7 +22,18 @@ router.get('/discourse', function(req, res, next) {
   if (req.session.discourse && req.session.discourse.categories)
     model.discourse.hasCategories = req.session.discourse.categories.length > 0;
 
-  model.issues = req.session.repo.issues.filter(item => req.session.repo.selectedIssues.find(sel => sel == item.number));
+  model.issues = req.session.repo.issues.filter(item => req.session.repo.selectedIssues.find(sel => sel == item.number))
+    .map(item => {
+      item.classNames = 'fa-circle-o';
+      if (item.status == 'success') {
+        item.classNames = 'fa-check text-success';
+        item.isCompleted = true;
+      } else if (item.status == 'error') {
+        item.classNames = 'fa-close text-danger';
+        item.isCompleted = true;
+      }
+      return item;
+    });
 
   res.render('discourse', model);
 });
