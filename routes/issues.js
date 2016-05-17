@@ -1,4 +1,5 @@
 var express = require('express');
+var config = require('../config')(process.env.CONFIG);
 var github = require("../lib/github")();
 var Promise = require('bluebird');
 var router = express.Router();
@@ -81,47 +82,64 @@ router.get('/repos/:owner/:name', function(req, res, next) {
     });
     req.session.repo.issueLabels = model.issueLabels;
   }).then(function() {
-    return githubRepoIssues({user: req.session.repo.owner, repo: req.session.repo.name, state: 'open'});
-  }).then(function(issueResult) {
-    // Store the Repo Issues and add a label tags property
-    model.issues = issueResult.map(item => {
-      item.labelTags = item.labels.map(label => label.name).join(', ');
-      item.status = '';
-      return item;
-    });
+    var repoIssuePromises = [];
+    var page = 1;
+    do {
+      repoIssuePromises.push(page);
+      page++;
+    } while (page <= Math.ceil(selectedRepo.open_issues_count / config.github_api.results_per_page));
 
-    // Check to see if any issues have been selected and set their selected state
-    if (req.session.repo.selectedIssues) {
-      model.numSelectedIssues = req.session.repo.selectedIssues.length;
-      req.session.repo.selectedIssues.forEach(issue => {
-        var selectedIssue = model.issues.find(item => item.number == issue)
-        if (selectedIssue)
-          selectedIssue.selected = true;
+    model.issues = [];
+    Promise.each(repoIssuePromises, page => {
+      return githubRepoIssues(
+        {
+          user: req.session.repo.owner,
+          repo: req.session.repo.name,
+          state: 'open',
+          per_page: config.github_api.results_per_page,
+          page: page
+        }).then(function(pageResults) { model.issues = model.issues.concat(pageResults); });
+    }).then(function () {
+      // Store the Repo Issues and add a label tags property
+      model.issues = model.issues.map(item => {
+        item.labelTags = item.labels.map(label => label.name).join(', ');
+        item.status = '';
+        return item;
       });
-    }
 
-    req.session.repo.issues = model.issues;
+      // Check to see if any issues have been selected and set their selected state
+      if (req.session.repo.selectedIssues) {
+        model.numSelectedIssues = req.session.repo.selectedIssues.length;
+        req.session.repo.selectedIssues.forEach(issue => {
+          var selectedIssue = model.issues.find(item => item.number == issue)
+          if (selectedIssue)
+            selectedIssue.selected = true;
+        });
+      }
 
-    // Apply the Label Filter
-    if (req.query.filter) {
-      model.issues = model.issues.filter(item => item.labelTags.indexOf(req.query.filter) !== -1);
-      model.hideClearFilter = false;
-    }
+      req.session.repo.issues = model.issues;
 
-    // Apply the Label is Empty Filter
-    if (req.query.no_label) {
-      model.issues = model.issues.filter(item => item.labelTags.length === 0);
-      model.hideClearFilter = false;
-    }
+      // Apply the Label Filter
+      if (req.query.filter) {
+        model.issues = model.issues.filter(item => item.labelTags.indexOf(req.query.filter) !== -1);
+        model.hideClearFilter = false;
+      }
 
-    // Filter out un-selected items
-    if (req.query.only_selected) {
-      model.issues = model.issues.filter(item => item.selected);
-      model.showSelectedButton = false;
-    }
+      // Apply the Label is Empty Filter
+      if (req.query.no_label) {
+        model.issues = model.issues.filter(item => item.labelTags.length === 0);
+        model.hideClearFilter = false;
+      }
 
-    model.showBottomButton = model.issues.length > 10;
-    res.render('issues', model);
+      // Filter out un-selected items
+      if (req.query.only_selected) {
+        model.issues = model.issues.filter(item => item.selected);
+        model.showSelectedButton = false;
+      }
+
+      model.showBottomButton = model.issues.length > 10;
+      res.render('issues', model);
+    });
   }).catch(function(e) {
     res.redirect('/error');
   });
