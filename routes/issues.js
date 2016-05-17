@@ -82,15 +82,13 @@ router.get('/repos/:owner/:name', function(req, res, next) {
     });
     req.session.repo.issueLabels = model.issueLabels;
   }).then(function() {
-    var repoIssuePromises = [];
-    var page = 1;
-    do {
-      repoIssuePromises.push(page);
-      page++;
-    } while (page <= Math.ceil(selectedRepo.open_issues_count / config.github_api.results_per_page));
+    var number_of_pages = Math.ceil(selectedRepo.open_issues_count / config.github_api.results_per_page);
+    var promisesArrayForIssuePaging = Array.from(new Array(number_of_pages), (x, i) => i + 1);
+    // for (var i = 1; i <= number_of_pages; i++)
+    //   promisesArrayForIssuePaging.push(i);
 
     model.issues = [];
-    Promise.each(repoIssuePromises, page => {
+    Promise.each(promisesArrayForIssuePaging, page => {
       return githubRepoIssues(
         {
           user: req.session.repo.owner,
