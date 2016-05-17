@@ -33,7 +33,6 @@ router.post('/api/discourse/status', function(req, res, next) {
 
 router.post('/api/discourse/import', function(req, res, next) {
   var category = req.body.category;
-  var issue_number = req.body.issue_number;
   var url = req.session.discourse.url;
   var username = req.session.discourse.username;
   var api_key = req.session.discourse.api_key;
@@ -47,69 +46,66 @@ router.post('/api/discourse/import', function(req, res, next) {
   var githubCreateComment = Promise.promisify(github.issues.createComment, {context: github});
   var githubEditIssue = Promise.promisify(github.issues.edit, {context: github});
 
-  // Verify Issue still exists
-  var issue = req.session.repo.issues.find(item => item.number == issue_number);
-  if (!issue) {
-    res.send({success: false, issue_number: issue_number});
-    return;
-  }
-
   github.authenticate({
     type: "oauth",
     token: req.user.accessToken
   });
 
-  // Create Topic at Discourse Instance
-  var issue_date = new Date(issue.created_at).toString();
-  var topic_body = "<i>From @" + issue.user.login + " on " + issue_date + "</i><br /><br />"
-    + issue.body + "<br /><br />" + "<i>Copied from original issue: " + issue.html_url + "</i>";
+  var issues = req.session.repo.issues.filter(item => item.status === '').map(issue => {
+    // Create Topic at Discourse Instance
+    var issue_date = new Date(issue.created_at).toString();
+    var topic_body = "<i>From @" + issue.user.login + " on " + issue_date + "</i><br /><br />"
+      + issue.body + "<br /><br />" + "<i>Copied from original issue: " + issue.html_url + "</i>";
 
-  discourseCreateTopic(issue.title, topic_body, category).then(function(createResult) {
-    createResult = JSON.parse(createResult);
-    response_data.topic_id = createResult.topic_id;
-    response_data.topic_url = (url.endsWith('/')) ? url : url + '/';
-    response_data.topic_url += 't/' + createResult.topic_slug + '/' + response_data.topic_id;    
-  }).then(function() {
-    return githubGetComments({user: req.session.repo.owner, repo: req.session.repo.name, number: issue_number});
-  }).then(function(commentResult) {
-    return Promise.each(commentResult, item => {
-      var comment_date = new Date(item.created_at).toString();
-      var comment_body = "<i>From @" + item.user.login + " on " + comment_date + "</i><br /><br />" + item.body;
+    return discourseCreateTopic(issue.title, topic_body, category).then(function (createResult) {
+      createResult = JSON.parse(createResult);
+      response_data.topic_id = createResult.topic_id;
+      response_data.topic_url = (url.endsWith('/')) ? url : url + '/';
+      response_data.topic_url += 't/' + createResult.topic_slug + '/' + response_data.topic_id;
+    }).then(function () {
+      return githubGetComments({user: req.session.repo.owner, repo: req.session.repo.name, number: issue.number});
+    }).then(function (commentResult) {
+      return Promise.each(commentResult, commentItem => {
+        var comment_date = new Date(commentItem.created_at).toString();
+        var comment_body = "<i>From @" + commentItem.user.login + " on " + comment_date + "</i><br /><br />" + commentItem.body;
 
-      return discourseReplyToTopic(comment_body, response_data.topic_id);
+        return discourseReplyToTopic(comment_body, response_data.topic_id);
+      });
+    }).then(function () {
+      // Create GitHub Comment
+      var create_comment_body = "This issue was moved to " + response_data.topic_url;
+      var create_comment_parameters = {
+        user: req.session.repo.owner,
+        repo: req.session.repo.name,
+        number: issue.number,
+        body: create_comment_body
+      };
+      return githubCreateComment(create_comment_parameters);
+    }).then(function (createCommentResult) {
+      // Close GitHub Issue
+      var edit_issue_parameters = {
+        user: req.session.repo.owner,
+        repo: req.session.repo.name,
+        number: issue.number,
+        state: 'closed'
+      };
+      return githubEditIssue(edit_issue_parameters);
+    }).then(function (editIssueResult) {
+      req.session.repo.issues = req.session.repo.issues.map(selIssue => {
+        if (selIssue.number == issue.number)
+          selIssue.status = 'success';
+        return selIssue;
+      });
+    }).catch(function (e) {
+      req.session.repo.issues = req.session.repo.issues.map(selIssue => {
+        if (selIssue.number == issue.number)
+          selIssue.status = 'error';
+        return selIssue;
+      });
     });
-  }).then(function() {
-    // Create GitHub Comment
-    var create_comment_body = "This issue was moved to " + response_data.topic_url;
-    var create_comment_parameters = {
-      user: req.session.repo.owner,
-      repo: req.session.repo.name,
-      number: issue_number,
-      body: create_comment_body
-    };
-    return githubCreateComment(create_comment_parameters);
-  }).then(function(createCommentResult) {
-    // Close GitHub Issue
-    var edit_issue_parameters = {
-      user: req.session.repo.owner,
-      repo: req.session.repo.name,
-      number: issue_number,
-      state: 'closed'
-    };
-    return githubEditIssue(edit_issue_parameters);
-  }).then(function(editIssueResult) {
-    req.session.repo.issues = req.session.repo.issues.map(item => {
-      if (item.number == issue_number)
-        item.status = 'success';
-      return item;
-    });
-    res.send({success: true});
-  }).catch(function(e) {
-    req.session.repo.issues = req.session.repo.issues.map(item => {
-      if (item.number == issue_number)
-        item.status = 'error';
-      return item;
-    });
+  });
+
+  Promise.all(issues).then(function() {
     res.send({success: true});
   });
 });

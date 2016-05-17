@@ -86,6 +86,7 @@ router.get('/repos/:owner/:name', function(req, res, next) {
     // Store the Repo Issues and add a label tags property
     model.issues = issueResult.map(item => {
       item.labelTags = item.labels.map(label => label.name).join(', ');
+      item.status = '';
       return item;
     });
 

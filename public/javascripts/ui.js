@@ -75,20 +75,13 @@ $(document).ready(function() {
 
   // Discourse Page - Start Import
   $('#btnStartImport').on('click', function() {
-    var issues = $('.issue-numbers[data-completed="false"]');
-    if (issues.length > 0) {
+    if ($('.issue-numbers[data-completed="false"]').length > 0) {
       $('.btn, form').attr('disabled', 'disabled');
       $(this).button('loading');
 
-      issues.each(function (item) {
-        var issue_number = $(this).val();
-        $('#icon' + issue_number).removeClass('fa-circle-o').addClass('fa-circle-o-notch fa-spin');
-
-        var formdata = $('form').serialize() + '&issue_number=' + issue_number;
-        $.post('/api/discourse/import', formdata);
-
-        statusChecker = setInterval(checkStatus, 3000);
-      });
+      $('.fa-circle-o').removeClass('fa-circle-o').addClass('fa-circle-o-notch fa-spin');
+      $.post('/api/discourse/import', $('form').serialize());
+      statusChecker = setInterval(checkStatus, 3000);
     }
   });
 });
@@ -110,31 +103,9 @@ function checkStatus() {
     if ($('.issue-numbers[data-completed="false"]').length === 0) {
       $('.btn, form').removeAttr('disabled');
       $('#btnStartImport').button('reset');
+      $('#btnStartImport').attr('disabled', 'disabled');
+
       clearInterval(statusChecker);
     }
-  });
-}
-
-function importIssueToDiscourse() {
-  var issue_number = $('.issue-numbers[data-completed="false"]:first').val();
-  $('#icon' + issue_number).removeClass('fa-circle-o').addClass('fa-circle-o-notch fa-spin');
-
-  var formdata = $('form').serialize() + '&issue_number=' + issue_number;
-  var submission = $.post('/api/discourse/import', formdata);
-
-  submission.done(function(data) {
-    var current_issue = $('#status' + data.issue_number).attr('data-completed', 'true');
-
-    if (data.success)
-      $('#icon' + data.issue_number).removeClass('fa-circle-o-notch fa-spin').addClass('fa-check text-success');
-    else
-      $('#icon' + data.issue_number).removeClass('fa-circle-o-notch fa-spin').addClass('fa-close text-danger');
-
-    var next_issue = $('.issue-numbers[data-completed="false"]:first');
-    if (next_issue.length === 0) {
-      $('.btn, form').removeAttr('disabled');
-      $('#btnStartImport').button('reset');
-    } else
-      setTimeout(importIssueToDiscourse, 3000);
   });
 }
