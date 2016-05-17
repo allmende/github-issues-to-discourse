@@ -1,7 +1,7 @@
 var express = require('express');
 var config = require('../config')(process.env.CONFIG);
-var github = require("../lib/github")();
-var Promise = require('bluebird');
+var githubGetIssues = require("../lib/githubGetIssues");
+var githubGetIssueLabels = require("../lib/githubGetIssueLabels");
 var router = express.Router();
 
 router.param('owner', function(req, res, next, owner) {
@@ -39,10 +39,6 @@ router.get('/repos/:owner/:name', function(req, res, next) {
     clearFilterUrl: '/repos/' + fullRepoName
   };
 
-  // Promises
-  var githubGetLabels = Promise.promisify(github.issues.getLabels, {context: github});
-  var githubRepoIssues = Promise.promisify(github.issues.repoIssues, {context: github});
-
   // Build the Clear Filter/Show Selected URLs
   if (req.query.filter && req.query.only_selected) {
     model.showSelectedUrl += '?filter=' + req.query.filter;
@@ -61,49 +57,12 @@ router.get('/repos/:owner/:name', function(req, res, next) {
   if (!req.session.repo || req.session.repo.owner !== req.selectedOwner || req.session.repo.name !== req.selectedRepo)
     req.session.repo = { owner: req.selectedOwner, name: req.selectedRepo };
 
-  github.authenticate({
-    type: "oauth",
-    token: req.user.accessToken
-  });
-
-  githubGetLabels({ user: req.session.repo.owner, repo: req.session.repo.name }).then(function(labelResult) {
-    // Store the Issue Labels and add a few properties
-    model.issueLabels = labelResult.map(item => {
-      item.url = '?filter=' + item.name + ((req.query.only_selected) ? '&only_selected=true' : '');
-      item.selected = req.query.filter === item.name;
-      return item;
-    });
-
-    // Add an empty item to the Issue Labels
-    model.issueLabels.splice(0, 0, {
-      name: '-- empty --',
-      selected: req.query.no_label,
-      url: '?no_label=true' + ((req.query.only_selected) ? '&only_selected=true' : '')
-    });
+  new githubGetIssueLabels(req).then(function(labels) {
+    model.issueLabels = labels;
     req.session.repo.issueLabels = model.issueLabels;
   }).then(function() {
-    var number_of_pages = Math.ceil(selectedRepo.open_issues_count / config.github_api.results_per_page);
-    var promisesArrayForIssuePaging = Array.from(new Array(number_of_pages), (x, i) => i + 1);
-    // for (var i = 1; i <= number_of_pages; i++)
-    //   promisesArrayForIssuePaging.push(i);
-
-    model.issues = [];
-    Promise.each(promisesArrayForIssuePaging, page => {
-      return githubRepoIssues(
-        {
-          user: req.session.repo.owner,
-          repo: req.session.repo.name,
-          state: 'open',
-          per_page: config.github_api.results_per_page,
-          page: page
-        }).then(function(pageResults) { model.issues = model.issues.concat(pageResults); });
-    }).then(function () {
-      // Store the Repo Issues and add a label tags property
-      model.issues = model.issues.map(item => {
-        item.labelTags = item.labels.map(label => label.name).join(', ');
-        item.status = '';
-        return item;
-      });
+    new githubGetIssues(req, selectedRepo).then(function (issues) {
+      model.issues = issues;
 
       // Check to see if any issues have been selected and set their selected state
       if (req.session.repo.selectedIssues) {
@@ -137,9 +96,9 @@ router.get('/repos/:owner/:name', function(req, res, next) {
 
       model.showBottomButton = model.issues.length > 10;
       res.render('issues', model);
+    }).catch(function (e) {
+      res.redirect('/error');
     });
-  }).catch(function(e) {
-    res.redirect('/error');
   });
 });
 

@@ -10,7 +10,8 @@ var config = {
              protocol:           "https",
              host:               "api.github.com",
              pathPrefix:         "",
-             timeout:            5000
+             timeout:            5000,
+             results_per_page:   5                 // max value is 100
            },
 
            env : {
@@ -28,7 +29,8 @@ var config = {
              protocol:           "https",
              host:               "api.github.com",
              pathPrefix:         "",
-             timeout:            5000
+             timeout:            5000,
+             results_per_page:   5                 // max value is 100
            },
 
            env : {
@@ -46,7 +48,8 @@ var config = {
              protocol:           "https",
              host:               "api.github.com",
              pathPrefix:         "",
-             timeout:            5000
+             timeout:            5000,
+             results_per_page:   5                 // max value is 100
            },
 
            env : {
