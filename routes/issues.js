@@ -57,48 +57,48 @@ router.get('/repos/:owner/:name', function(req, res, next) {
   if (!req.session.repo || req.session.repo.owner !== req.selectedOwner || req.session.repo.name !== req.selectedRepo)
     req.session.repo = { owner: req.selectedOwner, name: req.selectedRepo };
 
-  new githubGetIssueLabels(req).then(function(labels) {
+  githubGetIssueLabels(req).then(function(labels) {
     model.issueLabels = labels;
     req.session.repo.issueLabels = model.issueLabels;
   }).then(function() {
-    new githubGetIssues(req, selectedRepo).then(function (issues) {
-      model.issues = issues;
+    return githubGetIssues(req, selectedRepo);
+  }).then(function (issues) {
+    model.issues = issues;
 
-      // Check to see if any issues have been selected and set their selected state
-      if (req.session.repo.selectedIssues) {
-        model.numSelectedIssues = req.session.repo.selectedIssues.length;
-        req.session.repo.selectedIssues.forEach(issue => {
-          var selectedIssue = model.issues.find(item => item.number == issue)
-          if (selectedIssue)
-            selectedIssue.selected = true;
-        });
-      }
+    // Check to see if any issues have been selected and set their selected state
+    if (req.session.repo.selectedIssues) {
+      model.numSelectedIssues = req.session.repo.selectedIssues.length;
+      req.session.repo.selectedIssues.forEach(issue => {
+        var selectedIssue = model.issues.find(item => item.number == issue)
+        if (selectedIssue)
+          selectedIssue.selected = true;
+      });
+    }
 
-      req.session.repo.issues = model.issues;
+    req.session.repo.issues = model.issues;
 
-      // Apply the Label Filter
-      if (req.query.filter) {
-        model.issues = model.issues.filter(item => item.labelTags.indexOf(req.query.filter) !== -1);
-        model.hideClearFilter = false;
-      }
+    // Apply the Label Filter
+    if (req.query.filter) {
+      model.issues = model.issues.filter(item => item.labelTags.indexOf(req.query.filter) !== -1);
+      model.hideClearFilter = false;
+    }
 
-      // Apply the Label is Empty Filter
-      if (req.query.no_label) {
-        model.issues = model.issues.filter(item => item.labelTags.length === 0);
-        model.hideClearFilter = false;
-      }
+    // Apply the Label is Empty Filter
+    if (req.query.no_label) {
+      model.issues = model.issues.filter(item => item.labelTags.length === 0);
+      model.hideClearFilter = false;
+    }
 
-      // Filter out un-selected items
-      if (req.query.only_selected) {
-        model.issues = model.issues.filter(item => item.selected);
-        model.showSelectedButton = false;
-      }
+    // Filter out un-selected items
+    if (req.query.only_selected) {
+      model.issues = model.issues.filter(item => item.selected);
+      model.showSelectedButton = false;
+    }
 
-      model.showBottomButton = model.issues.length > 10;
-      res.render('issues', model);
-    }).catch(function (e) {
-      res.redirect('/error');
-    });
+    model.showBottomButton = model.issues.length > 10;
+    res.render('issues', model);
+  }).catch(function (e) {
+    res.redirect('/error');
   });
 });
 
