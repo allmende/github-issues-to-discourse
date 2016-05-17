@@ -11,7 +11,7 @@ var config = {
              host:               "api.github.com",
              pathPrefix:         "",
              timeout:            5000,
-             results_per_page:   5                 // max value is 100
+             results_per_page:   30                 // max value is 100
            },
 
            env : {
@@ -30,7 +30,7 @@ var config = {
              host:               "api.github.com",
              pathPrefix:         "",
              timeout:            5000,
-             results_per_page:   5                 // max value is 100
+             results_per_page:   30                 // max value is 100
            },
 
            env : {
@@ -49,7 +49,7 @@ var config = {
              host:               "api.github.com",
              pathPrefix:         "",
              timeout:            5000,
-             results_per_page:   5                 // max value is 100
+             results_per_page:   30                 // max value is 100
            },
 
            env : {
