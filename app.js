@@ -22,7 +22,8 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(session({secret: config.session_secret, resave: true, saveUninitialized: true}));
+app.use(session({secret: config.session.secret, resave: true, saveUninitialized: true,
+  cookie: { maxAge: config.session.duration * 60 * 1000 } }));
 app.use(function(req, res, next) { req.config = config; next(); });
 
 // initialize passport and restore authentication state if available
