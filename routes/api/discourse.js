@@ -38,7 +38,6 @@ router.post('/api/discourse/import', function(req, res, next) {
   var url = req.session.discourse.url;
   var username = req.session.discourse.username;
   var api_key = req.session.discourse.api_key;
-  var response_data = {};
   var api = new Discourse(url, api_key, username);
 
   // Promises
@@ -53,9 +52,9 @@ router.post('/api/discourse/import', function(req, res, next) {
 
   var issues = req.session.repo.issues.filter(item => item.status === '').map(issue => {
     return discourseCreateTopic(req, issue).then(function(createResult) {
-      response_data.topic_id = createResult.topic_id;
-      response_data.topic_url = (url.endsWith('/')) ? url : url + '/';
-      response_data.topic_url += 't/' + createResult.topic_slug + '/' + response_data.topic_id;
+      issue.discourse = {topic_id: createResult.topic_id};
+      issue.discourse.topic_url = (url.endsWith('/')) ? url : url + '/';
+      issue.discourse.topic_url += 't/' + createResult.topic_slug + '/' + issue.discourse.topic_id;
     }).then(function () {
       return githubGetComments(req, issue);
     }).then(function (commentResult) {
@@ -63,11 +62,11 @@ router.post('/api/discourse/import', function(req, res, next) {
         var comment_date = new Date(commentItem.created_at).toString();
         var comment_body = "<i>From @" + commentItem.user.login + " on " + comment_date + "</i><br /><br />" + commentItem.body;
 
-        return discourseReplyToTopic(comment_body, response_data.topic_id);
+        return discourseReplyToTopic(comment_body, issue.discourse.topic_id);
       });
     }).then(function () {
       // Create GitHub Comment
-      var create_comment_body = "This issue was moved to " + response_data.topic_url;
+      var create_comment_body = "This issue was moved to " + issue.discourse.topic_url;
       var create_comment_parameters = {
         user: req.session.repo.owner,
         repo: req.session.repo.name,
