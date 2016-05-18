@@ -14,7 +14,7 @@ sudo ln -s /opt/node/bin/npm /usr/local/bin/npm
 ```
 
 ##Install Application
-Be sure to reference your HTTPS key and cert in the config if using HTTPS
+Be sure to reference your HTTPS key and cert in the config if using HTTPS  
 Setup a GitHub OAuth Developer Application (Profile > Settings at GitHub)
 * Put in your application name, URL, description
 * Callback field should be your `https://example.com/auth/github/callback` (replace example.com with your URL)
