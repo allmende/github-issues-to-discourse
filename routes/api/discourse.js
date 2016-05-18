@@ -34,7 +34,6 @@ router.post('/api/discourse/status', function(req, res, next) {
 });
 
 router.post('/api/discourse/import', function(req, res, next) {
-  var category = req.body.category;
   var url = req.session.discourse.url;
   var username = req.session.discourse.username;
   var api_key = req.session.discourse.api_key;
@@ -50,7 +49,7 @@ router.post('/api/discourse/import', function(req, res, next) {
     token: req.user.accessToken
   });
 
-  var issues = req.session.repo.issues.filter(item => item.status === '').map(issue => {
+  var issues = req.session.repo.issues.filter(item => item.status === '').splice(0, 2).map(issue => {
     return discourseCreateTopic(req, issue).then(function(createResult) {
       issue.discourse = {topic_id: createResult.topic_id};
       issue.discourse.topic_url = (url.endsWith('/')) ? url : url + '/';
@@ -99,7 +98,7 @@ router.post('/api/discourse/import', function(req, res, next) {
   });
 
   Promise.all(issues).then(function() {
-    res.send({success: true});
+    res.send({success: true, has_more: req.session.repo.issues.filter(item => item.status === '').length > 0});
   });
 });
 
