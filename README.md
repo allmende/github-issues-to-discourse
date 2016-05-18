@@ -24,7 +24,7 @@ npm install
 ```
 
 ##Install PM2
-Replace bin/www with bin/https if using HTTPS
+Replace `bin/www` with `bin/https` if using HTTPS
 ```
 sudo npm install pm2 -g
 sudo setcap cap_net_bind_service=+ep /opt/node/bin/node
