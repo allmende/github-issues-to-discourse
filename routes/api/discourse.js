@@ -29,7 +29,8 @@ router.post('/api/discourse/check', function(req, res, next) {
 });
 
 router.post('/api/discourse/status', function(req, res, next) {
-  var issues = req.session.repo.issues.filter(item => req.session.repo.selectedIssues.find(sel => sel == item.number));
+  var issues = req.session.repo.issues.filter(item => req.session.repo.selectedIssues.find(sel => sel == item.number))
+    .map(item => { return { number: item.number, status: item.status }});
   res.send({issues: issues});
 });
 
@@ -49,7 +50,7 @@ router.post('/api/discourse/import', function(req, res, next) {
     token: req.user.accessToken
   });
 
-  var issues = req.session.repo.issues.filter(item => item.status === '').splice(0, 2).map(issue => {
+  var issues = req.session.repo.issues.filter(item => item.status === '').map(issue => {
     return discourseCreateTopic(req, issue).then(function(createResult) {
       issue.discourse = {topic_id: createResult.topic_id};
       issue.discourse.topic_url = (url.endsWith('/')) ? url : url + '/';
@@ -88,17 +89,19 @@ router.post('/api/discourse/import', function(req, res, next) {
           selIssue.status = 'success';
         return selIssue;
       });
+      req.session.save(err => {});
     }).catch(function (e) {
       req.session.repo.issues = req.session.repo.issues.map(selIssue => {
         if (selIssue.number == issue.number)
           selIssue.status = 'error';
         return selIssue;
       });
+      req.session.save(err => {});
     });
   });
 
   Promise.all(issues).then(function() {
-    res.send({success: true, has_more: req.session.repo.issues.filter(item => item.status === '').length > 0});
+    res.send({success: true});
   });
 });
 

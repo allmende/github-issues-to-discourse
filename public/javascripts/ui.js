@@ -80,19 +80,11 @@ $(document).ready(function() {
       $(this).button('loading');
 
       $('.fa-circle-o').removeClass('fa-circle-o').addClass('fa-circle-o-notch fa-spin');
+      $.post('/api/discourse/import', $('form').serialize());
       statusChecker = setInterval(checkStatus, 3000);
-      importIssues();
     }
   });
 });
-
-function importIssues() {
-  var importSubmission = $.post('/api/discourse/import', $('form').serialize());
-  importSubmission.done(function(data) {
-    if (data.has_more)
-      importIssues();
-  });
-}
 
 function checkStatus() {
   var submission = $.post('/api/discourse/status');
