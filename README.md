@@ -14,6 +14,7 @@ sudo ln -s /opt/node/bin/npm /usr/local/bin/npm
 ```
 
 ##Install Application
+Be sure to reference your HTTPS key and cert in the config if using HTTPS
 ```
 git clone https://github.com/cpradio/github-issues-to-discourse.git
 cd github-issues-to-discourse
@@ -23,10 +24,12 @@ npm install
 ```
 
 ##Install PM2
+Replace bin/www with bin/https if using HTTPS
 ```
 sudo npm install pm2 -g
 sudo setcap cap_net_bind_service=+ep /opt/node/bin/node
 CONFIG=production pm2 start bin/www
+pm2 save
 pm2 startup ubuntu
 ```
 
