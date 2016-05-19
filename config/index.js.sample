@@ -6,7 +6,7 @@ var config = {
 
            session: {
              secret:             "SESSION SECRET SIGN PHRASE",
-             duration:           30                // in minutes
+             duration:           30                 // in minutes
            },
 
            github_api: {
@@ -21,9 +21,9 @@ var config = {
            env : {
              port:               3000,              // change to 443 for HTTPS
              ssl: {
-               private_key:      '/path/to/key.pem',
-               full_chain_key:   '/path/to/fullchain.pem',
-               chain_key:        '/path/to/chain.pem'
+               key:              '/path/to/key.pem',
+               cert:             '/path/to/fullchain.pem',
+               ca:               '/path/to/chain.pem'
              }
            }
          },
@@ -34,7 +34,7 @@ var config = {
 
            session: {
              secret:             "SESSION SECRET SIGN PHRASE",
-             duration:           30                // in minutes
+             duration:           30                 // in minutes
            },
 
            github_api: {
@@ -49,9 +49,9 @@ var config = {
            env : {
              port:               80,                // change to 443 for HTTPS
              ssl: {
-               private_key:      '/path/to/key.pem',
-               full_chain_key:   '/path/to/fullchain.pem',
-               chain_key:        '/path/to/chain.pem'
+               key:              '/path/to/key.pem',
+               cert:             '/path/to/fullchain.pem',
+               ca:               '/path/to/chain.pem'
              }
            }
          },
@@ -62,7 +62,7 @@ var config = {
 
            session: {
              secret:             "SESSION SECRET SIGN PHRASE",
-             duration:           30                // in minutes
+             duration:           30                 // in minutes
            },
 
            github_api: {
@@ -77,9 +77,9 @@ var config = {
            env : {
              port:               443,               // change to 443 for HTTPS
              ssl: {
-               private_key:      '/path/to/key.pem',
-               full_chain_key:   '/path/to/fullchain.pem',
-               chain_key:        '/path/to/chain.pem'
+               key:              '/path/to/key.pem',
+               cert:             '/path/to/fullchain.pem',
+               ca:               '/path/to/chain.pem'
              }
            }
          }
