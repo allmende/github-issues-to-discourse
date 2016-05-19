@@ -9,6 +9,11 @@ var config = require('../config')(process.env.CONFIG);
 var debug = require('debug')('github-issues-to-discourse:server');
 var https = require('https');
 var fs = require('fs');
+var options = {
+  key: fs.readFileSync(config.env.ssl.key),
+  cert: fs.readFileSync(config.env.ssl.cert),
+  ca: fs.readFileSync(config.env.ssl.ca)
+}
 
 /**
  * Get port from environment and store in Express.
@@ -20,7 +25,7 @@ app.set('port', port);
 /**
  * Create HTTPS server.
  */
-var server = https.createServer(config.env.ssl, app);
+var server = https.createServer(options, app);
 
 /**
  * Listen on provided port, on all network interfaces.
