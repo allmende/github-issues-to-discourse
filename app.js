@@ -8,8 +8,10 @@ var bodyParser = require('body-parser');
 var passport = require('passport');
 var GitHubStrategy = require('passport-github').Strategy;
 var session = require('express-session');
+var pjson = require('./package.json');
 
 var app = express();
+app.locals.version = pjson.version;
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
