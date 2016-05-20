@@ -21,9 +21,9 @@ $(document).ready(function() {
     submission.done(function(data) {
       if (data.is_bulk)
         if (data.checked === 'true')
-          $('tbody input[type=checkbox]').attr('checked', "checked");
+          $('tbody input[type=checkbox]').prop('checked', true);
         else
-          $('tbody input[type=checkbox]').removeAttr('checked');
+          $('tbody input[type=checkbox]').prop('checked', false);
 
       $('.numSelectedIssues').text(data.num_selected);
 
