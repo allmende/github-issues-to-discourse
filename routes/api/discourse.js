@@ -50,7 +50,8 @@ router.post('/api/discourse/import', function(req, res, next) {
     token: req.user.accessToken
   });
 
-  var issues = req.session.repo.issues.filter(item => item.status === '').map(issue => {
+  var issues = req.session.repo.issues.filter(item => item.status === '' && req.session.repo.selectedIssues.find(sel => sel == item.number));
+  issues.map(issue => {
     return discourseCreateTopic(req, issue).then(function(createResult) {
       issue.discourse = {topic_id: createResult.topic_id};
       issue.discourse.topic_url = (url.endsWith('/')) ? url : url + '/';

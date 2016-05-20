@@ -22,7 +22,8 @@ router.get('/discourse', function(req, res, next) {
   if (req.session.discourse && req.session.discourse.categories)
     model.discourse.hasCategories = req.session.discourse.categories.length > 0;
 
-  model.issues = req.session.repo.issues.filter(item => req.session.repo.selectedIssues.find(sel => sel == item.number))
+  var selectedIssues = req.session.repo.selectedIssues || [];
+  model.issues = req.session.repo.issues.filter(item => selectedIssues.find(sel => sel == item.number))
     .map(item => {
       item.classNames = 'fa-circle-o';
       if (item.status == 'success') {

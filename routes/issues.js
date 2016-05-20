@@ -31,7 +31,6 @@ router.get('/repos/:owner/:name', function(req, res, next) {
     user: req.session.user.profile,
     selectedRepo: selectedRepo,
     selectedFilter: '',
-    numTotalIssues: selectedRepo.open_issues_count,
     numSelectedIssues: 0,
     hideClearFilter: true,
     showSelectedButton: true,
@@ -55,7 +54,7 @@ router.get('/repos/:owner/:name', function(req, res, next) {
 
   // Store the Repo Information in Session, reset it if the repo changes
   if (!req.session.repo || req.session.repo.owner !== req.selectedOwner || req.session.repo.name !== req.selectedRepo)
-    req.session.repo = { owner: req.selectedOwner, name: req.selectedRepo };
+    req.session.repo = { owner: req.selectedOwner, name: req.selectedRepo, selectedIssues: [] };
 
   githubGetIssueLabels(req).then(function(labels) {
     model.issueLabels = labels;
@@ -64,16 +63,21 @@ router.get('/repos/:owner/:name', function(req, res, next) {
     return githubGetIssues(req, selectedRepo);
   }).then(function (issues) {
     model.issues = issues;
+    model.numTotalIssues = model.issues.length;
+
+    // Clean up Selected Issues
+    req.session.repo.selectedIssues = req.session.repo.selectedIssues.filter(item => {
+      return req.session.repo.issues.find(issue => issue.number == item && issue.status !== 'success');
+    });
+
+    model.numSelectedIssues = req.session.repo.selectedIssues.length;
 
     // Check to see if any issues have been selected and set their selected state
-    if (req.session.repo.selectedIssues) {
-      model.numSelectedIssues = req.session.repo.selectedIssues.length;
-      req.session.repo.selectedIssues.forEach(issue => {
-        var selectedIssue = model.issues.find(item => item.number == issue)
-        if (selectedIssue)
-          selectedIssue.selected = true;
-      });
-    }
+    req.session.repo.selectedIssues.forEach(issue => {
+      var selectedIssue = model.issues.find(item => item.number == issue)
+      if (selectedIssue)
+        selectedIssue.selected = true;
+    });
 
     req.session.repo.issues = model.issues;
 
