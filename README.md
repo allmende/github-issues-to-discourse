@@ -1,6 +1,6 @@
-#Installation
+# Installation
 
-##Install Node/NPM
+## Install Node/NPM
 ```
 wget https://nodejs.org/dist/v4.4.4/node-v4.4.4-linux-x64.tar.xz
 mkdir node
@@ -13,7 +13,7 @@ sudo ln -s /opt/node/bin/node /usr/local/bin/node
 sudo ln -s /opt/node/bin/npm /usr/local/bin/npm
 ```
 
-##Install Application
+## Install Application
 Be sure to reference your HTTPS key and cert in the config if using HTTPS  
 Setup a GitHub OAuth Developer Application (Profile > Settings at GitHub)
 * Put in your application name, URL, description
@@ -27,7 +27,7 @@ nano config/index.js
 npm install
 ```
 
-##Install PM2
+## Install PM2
 Replace `bin/www` with `bin/https` if using HTTPS
 ```
 sudo npm install pm2 -g
@@ -35,6 +35,14 @@ sudo setcap cap_net_bind_service=+ep /opt/node/bin/node
 CONFIG=production pm2 start bin/www
 pm2 save
 pm2 startup ubuntu
+```
+
+## Updating the Applicatio
+Pull down the latest source from github, update the packages, restart the app
+```
+git pull
+npm install
+pm2 restart 0
 ```
 
 Source: https://www.digitalocean.com/community/tutorials/how-to-set-up-a-node-js-application-for-production-on-ubuntu-14-04
