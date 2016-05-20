@@ -1,6 +1,5 @@
 var express = require('express');
 var githubGetRepos = require("../lib/githubGetRepos");
-var Promise = require('bluebird');
 var router = express.Router();
 
 /* GET repos listing. */
