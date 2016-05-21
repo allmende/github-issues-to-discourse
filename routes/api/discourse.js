@@ -25,13 +25,14 @@ router.post('/api/discourse/check', function(req, res, next) {
       item.subcategories = json.categories.filter(sub => sub.parent_category_id && sub.parent_category_id === item.id);
       return item;
     }).sort(function(a, b) { return a.position - b.position; });
+
   req.session.discourse = {url: url, username: username, api_key: api_key, categories: categories};
   res.send({success: true, categories: categories});
 });
 
 router.post('/api/discourse/status', function(req, res, next) {
   var issues = req.session.repo.issues.filter(item => req.session.repo.selectedIssues.find(sel => sel == item.number))
-    .map(item => { return { number: item.number, status: item.status }});
+    .map(item => { return { number: item.number, status: item.status, errorMessage: item.errorMessage }});
   res.send({issues: issues});
 });
 
@@ -51,9 +52,11 @@ router.post('/api/discourse/import', function(req, res, next) {
     token: req.user.accessToken
   });
 
-  var issues = req.session.repo.issues.filter(item => item.status === '' && req.session.repo.selectedIssues.find(sel => sel == item.number));
+  var issues = req.session.repo.issues.filter(item => item.status !== 'success' && req.session.repo.selectedIssues.find(sel => sel == item.number));
   issues.map(issue => {
     return discourseCreateTopic(req, issue).then(function(createResult) {
+      if (createResult.errors && createResult.errors.length > 0)
+        throw new Error(createResult.errors.join('\r\n'));
       issue.discourse = {topic_id: createResult.topic_id};
       issue.discourse.topic_url = (url.endsWith('/')) ? url : url + '/';
       issue.discourse.topic_url += 't/' + createResult.topic_slug + '/' + issue.discourse.topic_id;
@@ -93,12 +96,19 @@ router.post('/api/discourse/import', function(req, res, next) {
       });
       req.session.save(err => {});
     }).catch(function (error) {
-      winston.log('info', '/api/discourse/import data', {session: req.session});
-      winston.error('Unable import issues for %s issue #%s', fullRepoName, issue.number, {error: error});
+      var details = {
+        username: (req.session.user && req.session.user.profile) ? req.session.user.profile.username : '',
+        repoName: (req.session.repo) ? req.session.repo.full_name : '',
+        issue: issue,
+        error: error
+      };
+      winston.error('Unable import issues for %s issue #%s', req.session.repo.full_name, issue.number, details);
 
       req.session.repo.issues = req.session.repo.issues.map(selIssue => {
-        if (selIssue.number == issue.number)
+        if (selIssue.number == issue.number) {
           selIssue.status = 'error';
+          selIssue.errorMessage = error.message;
+        }
         return selIssue;
       });
       req.session.save(err => {});

@@ -67,7 +67,7 @@ $(document).ready(function() {
 
   // Discourse Page - Select a Category
   $('#discourseCategory').on('change', function() {
-    if ($(this).val() !== "" && $('.issue-numbers[data-completed="false"]').length > 0)
+    if ($(this).val() !== "" && hasIssuesToImport())
       $('#btnStartImport').removeAttr('disabled');
     else
       $('#btnStartImport').attr('disabled', 'disabled');
@@ -75,16 +75,21 @@ $(document).ready(function() {
 
   // Discourse Page - Start Import
   $('#btnStartImport').on('click', function() {
-    if ($('.issue-numbers[data-completed="false"]').length > 0) {
+    if (hasIssuesToImport()) {
       $('.btn, form').attr('disabled', 'disabled');
       $(this).button('loading');
 
       $('.fa-circle-o').removeClass('fa-circle-o').addClass('fa-circle-o-notch fa-spin');
+      $('.fa-close').removeClass('fa-close').removeClass('text-danger').addClass('fa-circle-o-notch fa-spin');
       $.post('/api/discourse/import', $('form').serialize());
       statusChecker = setInterval(checkStatus, 3000);
     }
   });
 });
+
+function hasIssuesToImport() {
+  return $('tbody i[data-completed="false"]').length > 0 || $('tbody i.fa-close[data-completed="true"]').length > 0;
+}
 
 function checkStatus() {
   var submission = $.post('/api/discourse/status');
@@ -92,15 +97,16 @@ function checkStatus() {
     var issues = data.issues;
     $.each(issues, function(key, value) {
       if (value.status == 'success') {
-        $('#status' + value.number).attr('data-completed', 'true');
-        $('#icon' + value.number).removeClass('fa-circle-o-notch fa-spin').addClass('fa-check text-success');
+        $('#icon' + value.number).attr('data-completed', 'true').removeClass('fa-circle-o-notch fa-spin').addClass('fa-check text-success');
       } else if (value.status == 'error') {
-        $('#status' + value.number).attr('data-completed', 'true');
-        $('#icon' + value.number).removeClass('fa-circle-o-notch fa-spin').addClass('fa-close text-danger');
+        $('#issuesWithErrors').removeClass('hidden');
+        $('#error' + value.number).text(value.errorMessage);
+        $('#icon' + value.number).attr('data-completed', 'true').removeClass('fa-circle-o-notch fa-spin').addClass('fa-close text-danger');
       }
     });
 
-    if ($('.issue-numbers[data-completed="false"]').length === 0) {
+    // do not use hasIssuesToImport, as this is to clear the interval, meaning all issues were attempted
+    if ($('tbody i[data-completed="false"]').length === 0) {
       $('.btn, form').removeAttr('disabled');
       $('#btnStartImport').button('reset');
       $('#btnStartImport').attr('disabled', 'disabled');

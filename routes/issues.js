@@ -103,8 +103,13 @@ router.get('/repos/:owner/:name', function(req, res, next) {
     model.showBottomButton = model.issues.length > 10;
     res.render('issues', model);
   }).catch(function (error) {
-    winston.log('info', '/repos/%s data', fullRepoName, {session: req.session});
-    winston.error('Unable to access GitHub Issues for %s', fullRepoName, {error: error});
+    var details = {
+      username: (req.session.user && req.session.user.profile) ? req.session.user.profile.username : '',
+      repoName: (req.session.repo) ? req.session.repo.full_name : '',
+      issues: (req.session.repo && req.session.repo.issues) ? req.session.repo.issues : {},
+      error: error
+    };
+    winston.error('Unable to access GitHub Issues for %s', fullRepoName, details);
     res.render('error', {message: "Unable to access GitHub Issues", error: {status: 500}});
   });
 });

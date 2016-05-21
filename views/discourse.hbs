@@ -65,6 +65,10 @@
           <a href="{{selectedRepo.html_url}}" target="_blank">{{selectedRepo.full_name}}</a>
           into the Discourse instance provided.
         </p>
+        <div class="alert alert-danger {{#unless hasIssueWithError}}hidden{{/unless}}" id="issuesWithErrors">
+          Hmm.... seems at least one of the issues failed to import.
+          Please correct any issues and click the Start Import button to try them again.
+        </div>
         <table class="table table-hover">
           <thead>
           <tr>
@@ -77,10 +81,12 @@
             {{#each issues}}
               <tr>
                 <td>#{{number}}</td>
-                <td><a href="{{html_url}}" target="_blank">{{title}}</a></td>
+                <td>
+                  <a href="{{html_url}}" target="_blank">{{title}}</a>
+                  <div id="error{{number}}" class="text-danger">{{errorMessage}}</div>
+                </td>
                 <td class="text-center">
-                  <i class="fa {{classNames}}" id="icon{{number}}" aria-hidden="true"></i>
-                  <input type="hidden" class="issue-numbers" id="status{{number}}" data-completed="{{#if isCompleted}}true{{else}}false{{/if}}" name="issue{{number}}" value="{{number}}" />
+                  <i class="fa {{classNames}}" id="icon{{number}}" aria-hidden="true" data-issue-number="{{number}}" data-completed="{{#if isCompleted}}true{{else}}false{{/if}}"></i>
                 </td>
               </tr>
             {{/each}}

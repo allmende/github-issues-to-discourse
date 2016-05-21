@@ -20,8 +20,12 @@ router.get('/repos', function(req, res, next) {
   }).then(function() {
     res.render('repos', model);
   }).catch(function(error) {
-    winston.log('info', '/repos data', {session: req.session});
-    winston.error('Unable to access GitHub Repos', {error: error});
+    var details = {
+      username: (req.session.user && req.session.user.profile) ? req.session.user.profile.username : '',
+      repos: (req.session.repos) ? req.session.repos.map(item => { return item.full_name }) : {},
+      error: error
+    };
+    winston.error('Unable to access GitHub Repos', details);
     res.render('error', {message: "Unable to access GitHub Repos", error: {status: 500}});
   });;
 });
