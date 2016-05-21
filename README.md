@@ -37,7 +37,7 @@ pm2 save
 pm2 startup ubuntu
 ```
 
-## Updating the Applicatio
+## Updating the Application
 Pull down the latest source from github, update the packages, restart the app
 ```
 git pull
