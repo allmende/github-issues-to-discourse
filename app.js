@@ -9,6 +9,7 @@ var passport = require('passport');
 var GitHubStrategy = require('passport-github').Strategy;
 var session = require('express-session');
 var pjson = require('./package.json');
+var winston = require('./lib/winston');
 
 var app = express();
 app.locals.version = pjson.version;
@@ -90,6 +91,9 @@ app.use(function(req, res, next) {
 // will print stacktrace
 if (app.get('env') === 'development') {
   app.use(function(err, req, res, next) {
+    winston.log('info', 'session data', {session: req.session});
+    winston.error('A general error occurred', {error: err});
+    
     res.status(err.status || 500);
     res.render('error', {
       message: err.message,
@@ -101,6 +105,9 @@ if (app.get('env') === 'development') {
 // production error handler
 // no stacktraces leaked to user
 app.use(function(err, req, res, next) {
+  winston.log('info', 'session data', {session: req.session});
+  winston.error('A general error occurred', {error: err});
+
   res.status(err.status || 500);
   res.render('error', {
     message: err.message,

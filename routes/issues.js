@@ -3,6 +3,7 @@ var config = require('../config')(process.env.CONFIG);
 var githubGetIssues = require("../lib/githubGetIssues");
 var githubGetIssueLabels = require("../lib/githubGetIssueLabels");
 var router = express.Router();
+var winston = require('winston');
 
 router.param('owner', function(req, res, next, owner) {
   var repo = req.session.user.repos.filter(function(item) { return item.full_name.split('/')[0] === owner; });
@@ -101,8 +102,10 @@ router.get('/repos/:owner/:name', function(req, res, next) {
 
     model.showBottomButton = model.issues.length > 10;
     res.render('issues', model);
-  }).catch(function (e) {
-    res.redirect('/error');
+  }).catch(function (error) {
+    winston.log('info', '/repos/%s data', fullRepoName, {session: req.session});
+    winston.error('Unable to access GitHub Issues for %s', fullRepoName, {error: error});
+    res.render('error', {message: "Unable to access GitHub Issues", error: {status: 500}});
   });
 });
 

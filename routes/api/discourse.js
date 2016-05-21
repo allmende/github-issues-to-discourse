@@ -5,6 +5,7 @@ var discourseCreateTopic = require("../../lib/discourseCreateTopic");
 var Discourse = require('discourse-api');
 var Promise = require('bluebird');
 var router = express.Router();
+var winston = require('winston');
 
 router.post('/api/discourse/check', function(req, res, next) {
   var url = req.body.url;
@@ -91,7 +92,10 @@ router.post('/api/discourse/import', function(req, res, next) {
         return selIssue;
       });
       req.session.save(err => {});
-    }).catch(function (e) {
+    }).catch(function (error) {
+      winston.log('info', '/api/discourse/import data', {session: req.session});
+      winston.error('Unable import issues for %s issue #%s', fullRepoName, issue.number, {error: error});
+
       req.session.repo.issues = req.session.repo.issues.map(selIssue => {
         if (selIssue.number == issue.number)
           selIssue.status = 'error';
