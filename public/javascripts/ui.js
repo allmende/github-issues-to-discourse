@@ -77,6 +77,7 @@ $(document).ready(function() {
   $('#btnStartImport').on('click', function() {
     if (hasIssuesToImport()) {
       $('.btn, form').attr('disabled', 'disabled');
+      $('#issuesWithErrors:not(.hidden)').addClass('hidden');
       $(this).button('loading');
 
       $('.fa-circle-o').removeClass('fa-circle-o').addClass('fa-circle-o-notch fa-spin');
@@ -96,11 +97,12 @@ function checkStatus() {
   submission.done(function(data) {
     var issues = data.issues;
     $.each(issues, function(key, value) {
+      $('#error' + value.number).text(value.errorMessage);
+
       if (value.status == 'success') {
         $('#icon' + value.number).attr('data-completed', 'true').removeClass('fa-circle-o-notch fa-spin').addClass('fa-check text-success');
       } else if (value.status == 'error') {
         $('#issuesWithErrors').removeClass('hidden');
-        $('#error' + value.number).text(value.errorMessage);
         $('#icon' + value.number).attr('data-completed', 'true').removeClass('fa-circle-o-notch fa-spin').addClass('fa-close text-danger');
       }
     });
@@ -109,9 +111,11 @@ function checkStatus() {
     if ($('tbody i[data-completed="false"]').length === 0) {
       $('.btn, form').removeAttr('disabled');
       $('#btnStartImport').button('reset');
-      $('#btnStartImport').attr('disabled', 'disabled');
 
       clearInterval(statusChecker);
     }
+
+    if (!hasIssuesToImport())
+      $('#btnStartImport').attr('disabled', 'disabled');
   });
 }

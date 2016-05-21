@@ -94,7 +94,7 @@ if (app.get('env') === 'development') {
     var details = {
       error: err,
       username: (req.session.user && req.session.user.profile) ? req.session.user.profile.username : '',
-      repoName: (req.session.repo) ? req.session.repo.full_name : '',
+      repoName: (req.session.repo) ? req.session.repo.owner + '/' + req.session.repo.name : '',
       issues: (req.session.repo && req.session.repo.issues) ? req.session.repo.issues : {}
     };
     winston.error(err.message, details);
@@ -113,7 +113,7 @@ app.use(function(err, req, res, next) {
   var details = {
     error: err,
     username: (req.session.user && req.session.user.profile) ? req.session.user.profile.username : '',
-    repoName: (req.session.repo) ? req.session.repo.full_name : '',
+    repoName: (req.session.repo) ? req.session.repo.owner + '/' + req.session.repo.name : '',
     issues: (req.session.repo && req.session.repo.issues) ? req.session.repo.issues : {}
   };
   winston.error(err.message, details);

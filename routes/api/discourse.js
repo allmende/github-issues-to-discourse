@@ -57,6 +57,7 @@ router.post('/api/discourse/import', function(req, res, next) {
     return discourseCreateTopic(req, issue).then(function(createResult) {
       if (createResult.errors && createResult.errors.length > 0)
         throw new Error(createResult.errors.join('\r\n'));
+
       issue.discourse = {topic_id: createResult.topic_id};
       issue.discourse.topic_url = (url.endsWith('/')) ? url : url + '/';
       issue.discourse.topic_url += 't/' + createResult.topic_slug + '/' + issue.discourse.topic_id;
@@ -90,19 +91,22 @@ router.post('/api/discourse/import', function(req, res, next) {
       return githubEditIssue(edit_issue_parameters);
     }).then(function (editIssueResult) {
       req.session.repo.issues = req.session.repo.issues.map(selIssue => {
-        if (selIssue.number == issue.number)
+        if (selIssue.number == issue.number) {
           selIssue.status = 'success';
+          selIssue.errorMessage = '';
+        }
         return selIssue;
       });
       req.session.save(err => {});
     }).catch(function (error) {
       var details = {
         username: (req.session.user && req.session.user.profile) ? req.session.user.profile.username : '',
-        repoName: (req.session.repo) ? req.session.repo.full_name : '',
+        repoName: (req.session.repo) ? req.session.repo.owner + '/' + req.session.repo.name : '',
         issue: issue,
         error: error
       };
-      winston.error('Unable import issues for %s issue #%s', req.session.repo.full_name, issue.number, details);
+      winston.error('Unable import issues for %s/%s issue #%s', req.session.repo.owner,
+        req.session.repo.name, issue.number, details);
 
       req.session.repo.issues = req.session.repo.issues.map(selIssue => {
         if (selIssue.number == issue.number) {

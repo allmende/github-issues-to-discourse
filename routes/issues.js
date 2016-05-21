@@ -105,7 +105,7 @@ router.get('/repos/:owner/:name', function(req, res, next) {
   }).catch(function (error) {
     var details = {
       username: (req.session.user && req.session.user.profile) ? req.session.user.profile.username : '',
-      repoName: (req.session.repo) ? req.session.repo.full_name : '',
+      repoName: fullRepoName,
       issues: (req.session.repo && req.session.repo.issues) ? req.session.repo.issues : {},
       error: error
     };
