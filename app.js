@@ -93,6 +93,7 @@ if (app.get('env') === 'development') {
   app.use(function(err, req, res, next) {
     var details = {
       error: err,
+      reqUrl: req.url,
       username: (req.session.user && req.session.user.profile) ? req.session.user.profile.username : '',
       repoName: (req.session.repo) ? req.session.repo.owner + '/' + req.session.repo.name : '',
       issues: (req.session.repo && req.session.repo.issues) ? req.session.repo.issues : {}
@@ -112,6 +113,7 @@ if (app.get('env') === 'development') {
 app.use(function(err, req, res, next) {
   var details = {
     error: err,
+    reqUrl: req.url,
     username: (req.session.user && req.session.user.profile) ? req.session.user.profile.username : '',
     repoName: (req.session.repo) ? req.session.repo.owner + '/' + req.session.repo.name : '',
     issues: (req.session.repo && req.session.repo.issues) ? req.session.repo.issues : {}

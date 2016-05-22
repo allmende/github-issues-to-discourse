@@ -104,6 +104,7 @@ router.get('/repos/:owner/:name', function(req, res, next) {
     res.render('issues', model);
   }).catch(function (error) {
     var details = {
+      reqUrl: req.url,
       username: (req.session.user && req.session.user.profile) ? req.session.user.profile.username : '',
       repoName: fullRepoName,
       issues: (req.session.repo && req.session.repo.issues) ? req.session.repo.issues : {},

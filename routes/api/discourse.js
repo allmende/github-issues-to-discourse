@@ -100,6 +100,7 @@ router.post('/api/discourse/import', function(req, res, next) {
       req.session.save(err => {});
     }).catch(function (error) {
       var details = {
+        reqUrl: req.url,
         username: (req.session.user && req.session.user.profile) ? req.session.user.profile.username : '',
         repoName: (req.session.repo) ? req.session.repo.owner + '/' + req.session.repo.name : '',
         issue: issue,

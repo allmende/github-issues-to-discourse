@@ -21,6 +21,7 @@ router.get('/repos', function(req, res, next) {
     res.render('repos', model);
   }).catch(function(error) {
     var details = {
+      reqUrl: req.url,
       username: (req.session.user && req.session.user.profile) ? req.session.user.profile.username : '',
       repos: (req.session.repos) ? req.session.repos.map(item => { return item.full_name }) : {},
       error: error
