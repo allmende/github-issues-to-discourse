@@ -99,7 +99,8 @@ router.get('/repos/:owner/:name', function(req, res, next) {
       model.issues = model.issues.filter(item => item.selected);
       model.showSelectedButton = false;
     }
-
+    
+    model.allItemsSelected = model.issues.filter(item => !item.selected).length === 0;
     model.showBottomButton = model.issues.length > 10;
     res.render('issues', model);
   }).catch(function (error) {
