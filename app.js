@@ -12,7 +12,7 @@ var pjson = require('./package.json');
 var winston = require('./lib/winston');
 
 var app = express();
-app.locals.version = pjson.version;
+app.locals.generator = pjson.name + " - version " + pjson.version + " - " + pjson.repository.url;
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
