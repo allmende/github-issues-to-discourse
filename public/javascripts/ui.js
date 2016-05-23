@@ -112,6 +112,9 @@ function checkStatus() {
       $('.btn, form').removeAttr('disabled');
       $('#btnStartImport').button('reset');
 
+      if ($('#issuesWithErrors').is(':not(:visible)'))
+        $('#isuesImportedSuccessfully').removeClass('hidden');
+
       clearInterval(statusChecker);
     }
 

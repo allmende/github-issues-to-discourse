@@ -65,6 +65,9 @@
           <a href="{{selectedRepo.html_url}}" target="_blank">{{selectedRepo.full_name}}</a>
           into the Discourse instance provided.
         </p>
+        <div class="alert alert-success {{#unless allIssuesImported}}hidden{{/unless}}" id="isuesImportedSuccessfully">
+          Congratulations! All of the issues were successfully imported.
+        </div>
         <div class="alert alert-danger {{#unless hasIssueWithError}}hidden{{/unless}}" id="issuesWithErrors">
           Hmm.... seems at least one of the issues failed to import.
           Please correct any issues and click the Start Import button to try them again. If you continue to

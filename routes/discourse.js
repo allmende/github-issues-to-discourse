@@ -22,7 +22,10 @@ router.get('/discourse', function(req, res, next) {
   if (req.session.discourse && req.session.discourse.categories)
     model.discourse.hasCategories = req.session.discourse.categories.length > 0;
 
-  model.hasIssueWithError = req.session.repo.issues.filter(item => item.status === 'error').length > 0;
+  model.allIssuesImported = req.session.repo.issues.filter(item => item.status !== 'success'
+    && req.session.repo.selectedIssues.find(sel => sel == item.number)).length === 0;
+  model.hasIssueWithError = req.session.repo.issues.filter(item => item.status === 'error'
+    && req.session.repo.selectedIssues.find(sel => sel == item.number)).length > 0;
 
   var selectedIssues = req.session.repo.selectedIssues || [];
   model.issues = req.session.repo.issues.filter(item => selectedIssues.find(sel => sel == item.number))
