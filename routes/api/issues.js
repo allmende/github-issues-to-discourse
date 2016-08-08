@@ -1,7 +1,8 @@
+var config = require('../../config')(process.env.CONFIG);
 var express = require('express');
 var router = express.Router();
 
-router.post('/api/issues/bulk', function(req, res, next) {
+router.post(config.route_path + 'api/issues/bulk', function(req, res, next) {
   var issues = req.body.issues;
   var checked = req.body.is_checked;
 
@@ -25,7 +26,7 @@ router.post('/api/issues/bulk', function(req, res, next) {
   res.send(response);
 });
 
-router.post('/api/issues/save', function(req, res, next) {
+router.post(config.route_path + 'api/issues/save', function(req, res, next) {
   var number = req.body.number;
   var checked = req.body.is_checked;
 

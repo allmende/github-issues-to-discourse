@@ -1,12 +1,14 @@
+var config = require('../config')(process.env.CONFIG);
 var express = require('express');
 var router = express.Router();
 
-router.get('/discourse', function(req, res, next) {
+router.get(config.route_path + 'discourse', function(req, res, next) {
   var fullRepoName = req.session.repo.owner + "/" + req.session.repo.name;
   var selectedRepo = req.session.user.repos.find(item => item.full_name === fullRepoName);
 
   var model = {
     title: req.config.title + " - Discourse Details",
+    base_url: req.config.web_path,
     user: req.session.user.profile,
     selectedRepo: selectedRepo,
     numSelectedIssues: 0,

@@ -1,3 +1,4 @@
+var config = require('../../config')(process.env.CONFIG);
 var express = require('express');
 var github = require("../../lib/github")();
 var githubGetComments = require("../../lib/githubGetComments");
@@ -7,7 +8,7 @@ var Promise = require('bluebird');
 var router = express.Router();
 var winston = require('winston');
 
-router.post('/api/discourse/check', function(req, res, next) {
+router.post(config.route_path + 'api/discourse/check', function(req, res, next) {
   var url = req.body.url;
   var username = req.body.username;
   var api_key = req.body.api_key;
@@ -30,13 +31,13 @@ router.post('/api/discourse/check', function(req, res, next) {
   res.send({success: true, categories: categories});
 });
 
-router.post('/api/discourse/status', function(req, res, next) {
+router.post(config.route_path + 'api/discourse/status', function(req, res, next) {
   var issues = req.session.repo.issues.filter(item => req.session.repo.selectedIssues.find(sel => sel == item.number))
     .map(item => { return { number: item.number, status: item.status, errorMessage: item.errorMessage }});
   res.send({issues: issues});
 });
 
-router.post('/api/discourse/import', function(req, res, next) {
+router.post(config.route_path + 'api/discourse/import', function(req, res, next) {
   var url = req.session.discourse.url;
   var username = req.session.discourse.username;
   var api_key = req.session.discourse.api_key;

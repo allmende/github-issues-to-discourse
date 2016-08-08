@@ -1,12 +1,14 @@
+var config = require('../config')(process.env.CONFIG);
 var express = require('express');
 var githubGetRepos = require("../lib/githubGetRepos");
 var router = express.Router();
 var winston = require('winston');
 
 /* GET repos listing. */
-router.get('/repos', function(req, res, next) {
+router.get(config.route_path + 'repos', function(req, res, next) {
   var model = {
     title: req.config.title + " - Repositories",
+    base_url: req.config.web_path,
     user: req.session.user.profile
   };
 
