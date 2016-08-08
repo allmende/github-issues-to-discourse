@@ -1,8 +1,8 @@
 {{#if user}}
   <p>Welcome back {{user.username}}! You are already authenticated, would you like to import another issue?</p>
-  <a href="/repos" role="button" class="btn btn-lg btn-primary">Yes, Let's Go!</a>
-  <a href="/logout" role="button" class="btn btn-lg btn-danger">No, Log me out</a>
+  <a href="{{base_url}}repos" role="button" class="btn btn-lg btn-primary">Yes, Let's Go!</a>
+  <a href="{{base_url}}logout" role="button" class="btn btn-lg btn-danger">No, Log me out</a>
 {{else}}
   <p>First you need to allow us to use the GitHub API:</p>
-  <a href="/auth/github" role="button" class="btn btn-lg btn-primary">Authorize with GitHub</a>
+  <a href="{{base_url}}auth/github" role="button" class="btn btn-lg btn-primary">Authorize with GitHub</a>
 {{/if}}

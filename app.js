@@ -38,7 +38,7 @@ passport.use(
     {
       clientID: config.github_client_id,
       clientSecret: config.github_client_secret,
-      callbackURL: '/auth/github/callback'
+      callbackURL: config.github_callback
     },
     function(accessToken, refreshToken, user, cb) {
       return cb(null, { accessToken: accessToken, profile: user } );
@@ -55,22 +55,22 @@ passport.deserializeUser(function(obj, done) {
 });
 
 //OAuth authentication route
-app.get('/auth/github', passport.authenticate('github', { scope: ['repo'] }));
-app.get('/auth/github/callback', passport.authenticate('github', { failureRedirect: '/' }), require('./routes/github/callback'));
+app.get(config.route_path + 'auth/github', passport.authenticate('github', { scope: ['repo'] }));
+app.get(config.route_path + 'auth/github/callback', passport.authenticate('github', { failureRedirect: '/' }), require('./routes/github/callback'));
 
 // Define the GET requests
-app.get('/', require('./routes/index'));
-app.get('/repos', ensureAuthenticated, require('./routes/repos'));
-app.get('/repos/:owner/:name', ensureAuthenticated, require('./routes/issues'));
-app.get('/discourse', ensureAuthenticated, require('./routes/discourse'));
-app.get('/logout', require('./routes/logout'));
+app.get(config.route_path, require('./routes/index'));
+app.get(config.route_path + 'repos', ensureAuthenticated, require('./routes/repos'));
+app.get(config.route_path + 'repos/:owner/:name', ensureAuthenticated, require('./routes/issues'));
+app.get(config.route_path + 'discourse', ensureAuthenticated, require('./routes/discourse'));
+app.get(config.route_path + 'logout', require('./routes/logout'));
 
 // Define the POST requests
-app.post('/api/issues/bulk', ensureAuthenticated, require('./routes/api/issues'));
-app.post('/api/issues/save', ensureAuthenticated, require('./routes/api/issues'));
-app.post('/api/discourse/check', ensureAuthenticated, require('./routes/api/discourse'));
-app.post('/api/discourse/status', ensureAuthenticated, require('./routes/api/discourse'));
-app.post('/api/discourse/import', ensureAuthenticated, require('./routes/api/discourse'));
+app.post(config.route_path + 'api/issues/bulk', ensureAuthenticated, require('./routes/api/issues'));
+app.post(config.route_path + 'api/issues/save', ensureAuthenticated, require('./routes/api/issues'));
+app.post(config.route_path + 'api/discourse/check', ensureAuthenticated, require('./routes/api/discourse'));
+app.post(config.route_path + 'api/discourse/status', ensureAuthenticated, require('./routes/api/discourse'));
+app.post(config.route_path + 'api/discourse/import', ensureAuthenticated, require('./routes/api/discourse'));
 
 function ensureAuthenticated(req,res,next){
   if(req.isAuthenticated())

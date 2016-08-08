@@ -9,7 +9,7 @@
       <b>Oops!</b><br />
       Seems you have not selected any GitHub issues to import. Please go back and pick at least one issue.
     </p>
-    <a href="/repos" class="btn btn-primary">Go Back</a>
+    <a href="{{base_url}}repos" class="btn btn-primary">Go Back</a>
   </div>
 {{else}}
   <div class="container-fluid">
@@ -36,7 +36,7 @@
             <input type="text" class="form-control" name="api_key" id="discourseApiKey" value="{{discourse.api_key}}" placeholder="API Key" />
           </div>
           <div class="form-group">
-            <button type="button" id="btnCheckSettings" class="btn btn-primary" data-loading-text="Checking...">Check Settings</button>
+            <button type="button" id="btnCheckSettings" class="btn btn-primary" data-api-endpoint="{{base_url}}api/discourse/check" data-loading-text="Checking...">Check Settings</button>
           </div>
           <div class="form-group">
             <label for="discourseCategory">Discourse Category:</label>
@@ -53,13 +53,13 @@
             </select>
           </div>
           <div class="form-group">
-            <button type="button" id="btnStartImport" class="btn btn-primary" disabled="disabled" data-loading-text="Importing...">Start Import</button>
+            <button type="button" id="btnStartImport" class="btn btn-primary" disabled="disabled" data-api-endpoint="{{base_url}}api/discourse/import" data-loading-text="Importing...">Start Import</button>
           </div>
         </form>
       </div>
       <div class="col-lg-6">
         <h2>Selected Issues:
-        <a href="/repos/{{selectedRepo.full_name}}" class="btn btn-default">Change Issue Selection</a></h2>
+        <a href="{{base_url}}repos/{{selectedRepo.full_name}}" class="btn btn-default">Change Issue Selection</a></h2>
         <p>
           These issues below will be imported from
           <a href="{{selectedRepo.html_url}}" target="_blank">{{selectedRepo.full_name}}</a>
@@ -74,29 +74,31 @@
           experience issues, please take a quick read of our
           <a href="https://github.com/cpradio/github-issues-to-discourse/wiki/FAQ" target="_blank">FAQ</a>.
         </div>
-        <table class="table table-hover">
-          <thead>
-          <tr>
-            <th>#</th>
-            <th>Title</th>
-            <th class="text-center">Status</th>
-          </tr>
-          </thead>
-          <tbody>
-            {{#each issues}}
-              <tr>
-                <td>#{{number}}</td>
-                <td>
-                  <a href="{{html_url}}" target="_blank">{{title}}</a>
-                  <div id="error{{number}}" class="text-danger">{{errorMessage}}</div>
-                </td>
-                <td class="text-center">
-                  <i class="fa {{classNames}}" id="icon{{number}}" aria-hidden="true" data-issue-number="{{number}}" data-completed="{{#if isCompleted}}true{{else}}false{{/if}}"></i>
-                </td>
-              </tr>
-            {{/each}}
-          </tbody>
-        </table>
+        <form id="check-status" method="post" action="{{base_url}}api/discourse/status">
+          <table class="table table-hover">
+            <thead>
+            <tr>
+              <th>#</th>
+              <th>Title</th>
+              <th class="text-center">Status</th>
+            </tr>
+            </thead>
+            <tbody>
+              {{#each issues}}
+                <tr>
+                  <td>#{{number}}</td>
+                  <td>
+                    <a href="{{html_url}}" target="_blank">{{title}}</a>
+                    <div id="error{{number}}" class="text-danger">{{errorMessage}}</div>
+                  </td>
+                  <td class="text-center">
+                    <i class="fa {{classNames}}" id="icon{{number}}" aria-hidden="true" data-issue-number="{{number}}" data-completed="{{#if isCompleted}}true{{else}}false{{/if}}"></i>
+                  </td>
+                </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </form>
       </div>
     </div>
   </div>

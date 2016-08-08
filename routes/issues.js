@@ -24,19 +24,20 @@ router.param('name', function(req, res, next, name) {
 });
 
 /* GET issues listing. */
-router.get('/repos/:owner/:name', function(req, res, next) {
+router.get(config.route_path + 'repos/:owner/:name', function(req, res, next) {
   var fullRepoName = req.selectedOwner + "/" + req.selectedRepo;
   var selectedRepo = req.session.user.repos.find(item => item.full_name === fullRepoName);
   var model = {
     title: req.config.title + " - Open Issues for Repository " + fullRepoName,
+    base_url: req.config.web_path,
     user: req.session.user.profile,
     selectedRepo: selectedRepo,
     selectedFilter: '',
     numSelectedIssues: 0,
     hideClearFilter: true,
     showSelectedButton: true,
-    showSelectedUrl: '/repos/' + fullRepoName,
-    clearFilterUrl: '/repos/' + fullRepoName
+    showSelectedUrl: req.config.web_path + 'repos/' + fullRepoName,
+    clearFilterUrl: req.config.web_path + 'repos/' + fullRepoName
   };
 
   // Build the Clear Filter/Show Selected URLs

@@ -1,5 +1,5 @@
 <h2>Open Issues for <a href="{{selectedRepo.html_url}}" target="_blank">{{selectedRepo.full_name}}</a>:
-<a href="/repos" class="btn btn-default">Change Repository Selection</a></h2>
+<a href="{{base_url}}repos" class="btn btn-default">Change Repository Selection</a></h2>
 <p>
   Select the issues you want to import into Discourse.
 </p>
@@ -27,37 +27,39 @@
     <a href="{{showSelectedUrl}}" class="btn btn-default">{{#if showSelectedButton}}Show Selected{{else}}Show All{{/if}}</a>
   </li>
   <li role="presentation" class="pull-right">
-    <a href="/discourse" class="btn btn-primary">Continue</a>
+    <a href="{{base_url}}discourse" class="btn btn-primary">Continue</a>
   </li>
 </ul>
 
-<table class="table table-hover">
-  <thead>
-    <tr>
-      <th><input type="checkbox" class="select-all" value="all" {{#if allItemsSelected}}checked="checked"{{/if}} /></th>
-      <th>#</th>
-      <th>Title</th>
-      <th>Labels</th>
-      <th>Comments</th>
-    </tr>
-  </thead>
-  <tbody>
-    {{#each issues}}
-      <tr {{#if selected}}class="selected"{{/if}}>
-        <td><input type="checkbox" name="issues[]" value="{{number}}" {{#if selected}}checked="checked"{{/if}} /></td>
-        <td>#{{number}}</td>
-        <td><a href="{{html_url}}" target="_blank">{{title}}</a></td>
-        <td>{{labelTags}}</td>
-        <td>{{comments}}</td>
+<form method="post" action="{{base_url}}api/issues/save">
+  <table class="table table-hover">
+    <thead>
+      <tr>
+        <th><input type="checkbox" class="select-all" value="all" data-api-endpoint="{{base_url}}api/issues/bulk" {{#if allItemsSelected}}checked="checked"{{/if}} /></th>
+        <th>#</th>
+        <th>Title</th>
+        <th>Labels</th>
+        <th>Comments</th>
       </tr>
-    {{/each}}
-  </tbody>
-</table>
+    </thead>
+    <tbody>
+      {{#each issues}}
+        <tr {{#if selected}}class="selected"{{/if}}>
+          <td><input type="checkbox" name="issues[]" value="{{number}}" {{#if selected}}checked="checked"{{/if}} /></td>
+          <td>#{{number}}</td>
+          <td><a href="{{html_url}}" target="_blank">{{title}}</a></td>
+          <td>{{labelTags}}</td>
+          <td>{{comments}}</td>
+        </tr>
+      {{/each}}
+    </tbody>
+  </table>
+</form>
 
 {{#if showBottomButton}}
   <ul class="nav nav-pills">
     <li role="presentation" class="pull-right">
-      <a href="/discourse" class="btn btn-primary">Continue</a>
+      <a href="{{base_url}}discourse" class="btn btn-primary">Continue</a>
     </li>
   </ul>
 {{/if}}

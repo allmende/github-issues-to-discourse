@@ -14,9 +14,9 @@ $(document).ready(function() {
     var checkboxValue = $(this).val();
 
     if (checkboxValue === "all")
-      submission = $.post('/api/issues/bulk', gatherFormDataForIssues());
+      submission = $.post($(this).attr('data-api-endpoint'), gatherFormDataForIssues());
     else
-      submission = $.post('/api/issues/save', {number: checkboxValue, is_checked: $(this).is(':checked')});
+      submission = $.post($('form').attr('action'), {number: checkboxValue, is_checked: $(this).is(':checked')});
 
     submission.done(function(data) {
       if (data.is_bulk)
@@ -39,8 +39,9 @@ $(document).ready(function() {
     $(this).button('loading');
     $('#checkError,#checkSuccess').addClass('hidden');
     $('#discourseCategory option:not(.keep)').remove();
+    var endpoint = $(this).attr('data-api-endpoint');
 
-    var submission = $.post('/api/discourse/check', $('form').serialize());
+    var submission = $.post(endpoint, $('form').serialize());
     submission.done(function(data) {
       var ddlCategory = $('#discourseCategory');
       $('#btnCheckSettings').button('reset');
@@ -82,7 +83,9 @@ $(document).ready(function() {
 
       $('.fa-circle-o').removeClass('fa-circle-o').addClass('fa-circle-o-notch fa-spin');
       $('.fa-close').removeClass('fa-close').removeClass('text-danger').addClass('fa-circle-o-notch fa-spin');
-      $.post('/api/discourse/import', $('form').serialize());
+
+      var endpoint = $(this).attr('data-api-endpoint');
+      $.post(endpoint, $('form').serialize());
       statusChecker = setInterval(checkStatus, 3000);
     }
   });
@@ -93,7 +96,9 @@ function hasIssuesToImport() {
 }
 
 function checkStatus() {
-  var submission = $.post('/api/discourse/status');
+  var endpoint = $('form#check-status').attr('action');
+  var submission = $.post(endpoint);
+
   submission.done(function(data) {
     var issues = data.issues;
     $.each(issues, function(key, value) {
