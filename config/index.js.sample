@@ -5,7 +5,6 @@ var config = {
            web_path:             "/",
            github_client_id:     "GITHUB CLIENT ID",
            github_client_secret: "GITHUB CLIENT SECRET",
-           github_callback:      "/auth/github/callback",
 
            logging: {
              path:               "./local.log",
@@ -41,7 +40,6 @@ var config = {
            web_path:             "/",
            github_client_id:     "GITHUB CLIENT ID",
            github_client_secret: "GITHUB CLIENT SECRET",
-           github_callback:      "/auth/github/callback",
 
            logging: {
              path:               "./staging.log",
@@ -77,7 +75,6 @@ var config = {
            web_path:             "/",
            github_client_id:     "GITHUB CLIENT ID",
            github_client_secret: "GITHUB CLIENT SECRET",
-           github_callback:      "/auth/github/callback",
 
            logging: {
              path:               "./production.log",

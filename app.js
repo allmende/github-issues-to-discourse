@@ -37,8 +37,7 @@ passport.use(
   new GitHubStrategy(
     {
       clientID: config.github_client_id,
-      clientSecret: config.github_client_secret,
-      callbackURL: config.github_callback
+      clientSecret: config.github_client_secret
     },
     function(accessToken, refreshToken, user, cb) {
       return cb(null, { accessToken: accessToken, profile: user } );
