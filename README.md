@@ -32,7 +32,7 @@ Replace `bin/www` with `bin/https` if using HTTPS
 ```
 sudo npm install pm2 -g
 sudo setcap cap_net_bind_service=+ep /opt/node/bin/node
-CONFIG=production pm2 start bin/www
+env CONFIG=production pm2 start bin/www
 pm2 save
 pm2 startup ubuntu
 ```
